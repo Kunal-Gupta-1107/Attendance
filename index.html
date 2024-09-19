@@ -3,29 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Attendance Form</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Attendance Tracker</title>
   <link rel="manifest" href="/manifest.json">
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
-        console.log('Service Worker registered with scope:', registration.scope);
-      }, function(error) {
-        console.log('Service Worker registration failed:', error);
-      });
-    });
-  }
-</script>
-
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Attendance Form</h1>
-  <form id="attendanceForm">
-    <input type="text" id="name" placeholder="Enter your name" required>
-    <button type="submit" id="submitButton" disabled>Submit</button>
+  <h1>Attendance Tracker</h1>
+  <form id="attendance-form">
+    <label for="name">Name:</label>
+    <input type="text" id="name" required>
+    <button type="submit" id="submit-btn" disabled>Mark Attendance</button>
   </form>
-  <div id="attendanceList"></div>
   <script src="scripts.js"></script>
 </body>
 </html>
