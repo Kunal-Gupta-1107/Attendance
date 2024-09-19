@@ -1,14 +1,28 @@
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    padding: 20px;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 50px;
+  background: linear-gradient(45deg, #f3ec78, #af4261);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
 }
 
-input {
-    padding: 10px;
-    margin: 10px 0;
+@keyframes gradient {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
 }
 
-button {
-    padding: 10px 20px;
+#submitButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+form {
+  margin-top: 20px;
+}
+
+#attendanceList {
+  margin-top: 20px;
+  font-size: 1.2em;
 }
