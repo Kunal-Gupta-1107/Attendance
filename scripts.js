@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const nameInput = document.getElementById('name');
   const submitButton = document.getElementById('submitButton');
   const attendanceList = document.getElementById('attendanceList');
+  const installButton = document.getElementById('installButton'); // Install button for PWA
+  let deferredPrompt; // Variable to hold the install prompt
 
   // Define the target location (latitude and longitude) and radius in meters
   const targetLocation = { lat: 27.1862, lon: 78.0031 };
@@ -79,9 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let output = '';
 
     for (let date in attendance) {
-      output += <h2>${date}</h2><ul>;
+      output += `<h2>${date}</h2><ul>`;
       attendance[date].forEach(entry => {
-        output += <li>${entry.name} - ${entry.timestamp}</li>;
+        output += `<li>${entry.name} - ${entry.timestamp}</li>`;
       });
       output += '</ul>';
     }
@@ -90,4 +92,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Display attendance on page load
   displayAttendance();
+
+  // PWA Install Prompt Section
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the mini-infobar from appearing on mobile
+    e.preventDefault();
+    // Stash the event so it can be triggered later.
+    deferredPrompt = e;
+    // Show the install button
+    installButton.style.display = 'block';
+    
+    installButton.addEventListener('click', () => {
+      // Hide the install button
+      installButton.style.display = 'none';
+      // Show the install prompt
+      deferredPrompt.prompt();
+      // Wait for the user to respond to the prompt
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        deferredPrompt = null;
+      });
+    });
+  });
 });
