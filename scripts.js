@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Define the target location (latitude and longitude) and radius in meters
   const targetLocation = { lat: 27.1862, lon: 78.0031 };
-  const radius = 25; // Radius in meters
+  const radius = 50; // Radius in meters
 
   // Function to calculate the distance between two coordinates
   function getDistance(lat1, lon1, lat2, lon2) {
