@@ -26,15 +26,16 @@
   </form>
 
   <div id="attendanceList"></div>
-  <button id="installButton" style="display:none;">Install PWA</button> <!-- Install button for PWA -->
+  <button id="installButton" style="display:none;">Install PWA</button>
 
   <!-- Firebase SDK -->
   <script type="module">
-    // Firebase setup
+    // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
+    // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDVmQEP15M2vSWDzBXc1ySmQHhOtpZyGYw",
       authDomain: "attendanceapp-a03ea.firebaseapp.com",
@@ -45,9 +46,10 @@
       measurementId: "G-WXLGMV0D6S"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
-    const db = getFirestore(app);
+    const db = getFirestore(app); // Initialize Firestore
   </script>
 
   <script src="scripts.js"></script>
