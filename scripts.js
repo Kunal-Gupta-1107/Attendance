@@ -53,9 +53,11 @@
             resolve(distance <= radius);
           }, () => {
             reject(false);
+            console.log("JavaScript is connected and running!");
           });
         } else {
           reject(false);
+          console.log("JavaScript is connected and running!");
         }
       });
     }
