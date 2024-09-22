@@ -1,52 +1,17 @@
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  margin: 50px;
-  background: linear-gradient(45deg, #f3ec78, #af4261);
-  background-size: 400% 400%;
-  animation: gradient 15s ease infinite;
+/* Style the submit button when active (before click) */
+#submitButton {
+  background-color: blue;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-@keyframes gradient {
-  0% { background-position: 0% 0%; }
-  50% { background-position: 100% 100%; }
-  100% { background-position: 0% 0%; }
-}
-
-#submitButton:disabled {
-  background-color: #ccc;
+/* Style the submit button when disabled or clicked */
+#submitButton.loading {
+  background-color: white;
+  color: blue;
   cursor: not-allowed;
-}
-
-form {
-  margin-top: 20px;
-}
-
-#attendanceList {
-  margin-top: 20px;
-  font-size: 1.2em;
-}
-
-/* Loading Spinner */
-.spinner {
-  border: 8px solid rgba(0, 0, 0, 0.1);
-  border-top: 8px solid #3498db;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
-  margin: 20px auto;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-#loadingSpinner {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: none;
 }
