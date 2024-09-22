@@ -7,10 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
   let deferredPrompt;
 
   const targetLocation = { lat: 27.1962, lon: 78.0506 };
-  const radius = 25;
+  const radius = 25; // in meters
 
   function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371e3;
+    const R = 6371e3; // meters
     const φ1 = lat1 * Math.PI / 180;
     const φ2 = lat2 * Math.PI / 180;
     const Δφ = (lat2 - lat1) * Math.PI / 180;
@@ -31,10 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
           const distance = getDistance(latitude, longitude, targetLocation.lat, targetLocation.lon);
           resolve(distance <= radius);
         }, () => {
-          reject(false);
+          reject('Unable to retrieve your location.');
         });
       } else {
-        reject(false);
+        reject('Geolocation is not supported by this browser.');
       }
     });
   }
@@ -48,8 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const name = nameInput.value;
 
     if (name) {
-      const isInArea = await checkLocation();
-      
+      submitButton.disabled = true; // Disable button to prevent multiple submissions
+      const isInArea = await checkLocation().catch(error => {
+        alert(error); // Alert the user about the location error
+        submitButton.disabled = false; // Re-enable button
+        return false; // Return false to prevent attendance marking
+      });
+
       if (isInArea) {
         const today = new Date().toLocaleDateString();
         
@@ -68,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         alert('You are not within the required area.');
       }
+      submitButton.disabled = false; // Re-enable button after checking location
     }
   });
 
