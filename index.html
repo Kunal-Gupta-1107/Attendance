@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="manifest" href="/manifest.json">
   <script>
-    if ('serviceWorker' in navigator) { 
+    if ('serviceWorker' in navigator) {
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
           console.log('Service Worker registered with scope:', registration.scope);
@@ -19,7 +19,7 @@
   </script>
 </head>
 <body>
-  <h1>Attendance Foorm</h1>
+  <h1>Attendance Form</h1>
   <form id="attendanceForm">
     <input type="text" id="name" placeholder="Enter your name" required>
     <button type="submit" id="submitButton" disabled>Submit</button>
@@ -28,30 +28,93 @@
   <div id="attendanceList"></div>
   <button id="installButton" style="display:none;">Install PWA</button>
 
-  <!-- Firebase SDK -->
   <script type="module">
-    // Import the functions you need from the SDKs you need
+    // Import Firebase SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
     import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-    // Your web app's Firebase configuration
+    // Your web app's Firebase configuration  
     const firebaseConfig = {
-      apiKey: "AIzaSyDVmQEP15M2vSWDzBXc1ySmQHhOtpZyGYw",
-      authDomain: "attendanceapp-a03ea.firebaseapp.com",
-      projectId: "attendanceapp-a03ea",
-      storageBucket: "attendanceapp-a03ea.appspot.com",
-      messagingSenderId: "422851265218",
-      appId: "1:422851265218:web:4a94c3930e2b43a0b0f15b",
-      measurementId: "G-WXLGMV0D6S"
+      apiKey: "AIzaSyBFJrziRByYb0EwC2sYfP_cLtiQJlS02cY",
+      authDomain: "attendance-38541.firebaseapp.com",
+      projectId: "attendance-38541",
+      storageBucket: "attendance-38541.appspot.com",
+      messagingSenderId: "439358946279",
+      appId: "1:439358946279:web:fe466a68db5e8ad77f1b42"
     };
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-    const db = getFirestore(app); // Initialize Firestore
-  </script>
+    const db = getFirestore(app);
 
-  <script src="scripts.js"></script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('attendanceForm');
+      const nameInput = document.getElementById('name');
+      const submitButton = document.getElementById('submitButton');
+      const attendanceList = document.getElementById('attendanceList');
+      const installButton = document.getElementById('installButton');
+      let deferredPrompt;
+
+      nameInput.addEventListener('input', () => {
+        submitButton.disabled = !nameInput.value;
+      });
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const name = nameInput.value;
+
+        if (name) {
+          const today = new Date().toLocaleDateString();
+          
+          try {
+            await addDoc(collection(db, "attendance"), {
+              name: name,
+              date: today,
+              timestamp: serverTimestamp()
+            });
+            alert('Attendance recorded!');
+            form.reset();
+            displayAttendance();
+          } catch (error) {
+            console.error("Error adding document: ", error);
+          }
+        }
+      });
+
+      async function displayAttendance() {
+        attendanceList.innerHTML = '';
+        const querySnapshot = await getDocs(collection(db, "attendance"));
+        
+        let output = '';
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          output += `<li>${data.name} - ${data.timestamp.toDate().toLocaleString()}</li>`;
+        });
+        
+        attendanceList.innerHTML = output;
+      }
+
+      displayAttendance();
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installButton.style.display = 'block';
+        
+        installButton.addEventListener('click', () => {
+          installButton.style.display = 'none';
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              console.log('User accepted the install prompt');
+            } else {
+              console.log('User dismissed the install prompt');
+            }
+            deferredPrompt = null;
+          });
+        });
+      });
+    });
+  </script>
 </body>
 </html>
