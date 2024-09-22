@@ -25,8 +25,9 @@
     const installButton = document.getElementById('installButton');
     let deferredPrompt;
 
-    const targetLocation = { lat: 27.1962, lon: 78.0506 }; // Change to your target latitude and longitude
-    const radius = 25; // Distance in meters
+    const targetLocation = { lat: 27.1962, lon: 78.0506 }; // Home
+    //const targetLocation = { lat: 27.1862, lon: 78.0031 };// College Change to your target latitude and longitude
+    const radius = 50; // Distance in meters
     console.log("JavaScript is connected and running!");
 
 
