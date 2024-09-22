@@ -27,6 +27,8 @@
 
     const targetLocation = { lat: 27.1962, lon: 78.0506 }; // Change to your target latitude and longitude
     const radius = 25; // Distance in meters
+    console.log("JavaScript is connected and running!");
+
 
     function getDistance(lat1, lon1, lat2, lon2) {
       const R = 6371e3; // Radius of Earth in meters
