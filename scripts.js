@@ -51,36 +51,36 @@ document.addEventListener('DOMContentLoaded', () => {
       const isInArea = await checkLocation();
       
       if (isInArea) {
-        let attendance = JSON.parse(localStorage.getItem('attendance')) || {};
         const today = new Date().toLocaleDateString();
-
-        if (!attendance[today]) {
-          attendance[today] = [];
-        }
         
-        attendance[today].push({ name: name, timestamp: new Date().toLocaleString() });
-        localStorage.setItem('attendance', JSON.stringify(attendance));
-
-        alert('Attendance recorded!');
-        form.reset();
-        displayAttendance();
+        try {
+          await addDoc(collection(db, "attendance"), {
+            name: name,
+            date: today,
+            timestamp: serverTimestamp()
+          });
+          alert('Attendance recorded!');
+          form.reset();
+          displayAttendance();
+        } catch (error) {
+          console.error("Error adding document: ", error);
+        }
       } else {
         alert('You are not within the required area.');
       }
     }
   });
 
-  function displayAttendance() {
-    let attendance = JSON.parse(localStorage.getItem('attendance')) || {};
+  async function displayAttendance() {
+    attendanceList.innerHTML = '';
+    const querySnapshot = await getDocs(collection(db, "attendance"));
+    
     let output = '';
-
-    for (let date in attendance) {
-      output += `<h2>${date}</h2><ul>`;
-      attendance[date].forEach(entry => {
-        output += `<li>${entry.name} - ${entry.timestamp}</li>`;
-      });
-      output += '</ul>';
-    }
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      output += `<li>${data.name} - ${data.timestamp.toDate().toLocaleString()}</li>`;
+    });
+    
     attendanceList.innerHTML = output;
   }
 
