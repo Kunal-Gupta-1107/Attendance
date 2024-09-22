@@ -3,17 +3,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const nameInput = document.getElementById('name');
   const submitButton = document.getElementById('submitButton');
   const attendanceList = document.getElementById('attendanceList');
-  const installButton = document.getElementById('installButton'); // Install button for PWA
-  let deferredPrompt; // Variable to hold the install prompt
+  const installButton = document.getElementById('installButton');
+  let deferredPrompt;
 
-  // Define the target location (latitude and longitude) and radius in meters
-  // const targetLocation = { lat: 27.1862, lon: 78.0031 };
   const targetLocation = { lat: 27.1962, lon: 78.0506 };
-  const radius = 25; // Radius in meters
+  const radius = 25;
 
-  // Function to calculate the distance between two coordinates
   function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371e3; // Earth radius in meters
+    const R = 6371e3;
     const φ1 = lat1 * Math.PI / 180;
     const φ2 = lat2 * Math.PI / 180;
     const Δφ = (lat2 - lat1) * Math.PI / 180;
@@ -23,10 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
               Math.cos(φ1) * Math.cos(φ2) *
               Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // in meters
+    return R * c;
   }
 
-  // Function to check if the user is within the allowed area
   function checkLocation() {
     return new Promise((resolve, reject) => {
       if (navigator.geolocation) {
@@ -43,12 +39,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Enable the submit button only if there is a value in the input
   nameInput.addEventListener('input', () => {
     submitButton.disabled = !nameInput.value;
   });
 
-  // Handle form submission
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     const name = nameInput.value;
@@ -58,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (isInArea) {
         let attendance = JSON.parse(localStorage.getItem('attendance')) || {};
-        const today = new Date().toLocaleDateString(); // Use local date format for the key
+        const today = new Date().toLocaleDateString();
 
         if (!attendance[today]) {
           attendance[today] = [];
@@ -76,39 +70,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Function to display attendance list
   function displayAttendance() {
     let attendance = JSON.parse(localStorage.getItem('attendance')) || {};
     let output = '';
 
     for (let date in attendance) {
-      output += <h2>${date}</h2><ul>;
+      output += `<h2>${date}</h2><ul>`;
       attendance[date].forEach(entry => {
-        output += <li>${entry.name} - ${entry.timestamp}</li>;
+        output += `<li>${entry.name} - ${entry.timestamp}</li>`;
       });
       output += '</ul>';
     }
     attendanceList.innerHTML = output;
   }
 
-  // Display attendance on page load
   displayAttendance();
 
-  // PWA Install Prompt Section
   window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent the mini-infobar from appearing on mobile
     e.preventDefault();
-    // Stash the event so it can be triggered later.
     deferredPrompt = e;
-    // Show the install button
     installButton.style.display = 'block';
     
     installButton.addEventListener('click', () => {
-      // Hide the install button
       installButton.style.display = 'none';
-      // Show the install prompt
       deferredPrompt.prompt();
-      // Wait for the user to respond to the prompt
       deferredPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === 'accepted') {
           console.log('User accepted the install prompt');
