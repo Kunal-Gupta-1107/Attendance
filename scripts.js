@@ -1,121 +1,55 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('attendanceForm');
-  const nameInput = document.getElementById('name');
-  const submitButton = document.getElementById('submitButton');
-  const attendanceList = document.getElementById('attendanceList');
-  const installButton = document.getElementById('installButton'); // Install button for PWA
-  let deferredPrompt; // Variable to hold the install prompt
-
-  // Define the target location (latitude and longitude) and radius in meters
-  const targetLocation = { lat: 27.1862, lon: 78.0031 };
-  const radius = 50; // Radius in meters
-
-  // Function to calculate the distance between two coordinates
-  function getDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371e3; // Earth radius in meters
-    const φ1 = lat1 * Math.PI / 180;
-    const φ2 = lat2 * Math.PI / 180;
-    const Δφ = (lat2 - lat1) * Math.PI / 180;
-    const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-              Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // in meters
-  }
-
-  // Function to check if the user is within the allowed area
-  function checkLocation() {
-    return new Promise((resolve, reject) => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          const { latitude, longitude } = position.coords;
-          const distance = getDistance(latitude, longitude, targetLocation.lat, targetLocation.lon);
-          resolve(distance <= radius);
-        }, () => {
-          reject(false);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Form</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="/manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+          console.log('Service Worker registered with scope:', registration.scope);
+        }, function(error) {
+          console.log('Service Worker registration failed:', error);
         });
-      } else {
-        reject(false);
-      }
-    });
-  }
-
-  // Enable the submit button only if there is a value in the input
-  nameInput.addEventListener('input', () => {
-    submitButton.disabled = !nameInput.value;
-  });
-
-  // Handle form submission
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const name = nameInput.value;
-
-    if (name) {
-      const isInArea = await checkLocation();
-      
-      if (isInArea) {
-        let attendance = JSON.parse(localStorage.getItem('attendance')) || {};
-        const today = new Date().toLocaleDateString(); // Use local date format for the key
-
-        if (!attendance[today]) {
-          attendance[today] = [];
-        }
-        
-        attendance[today].push({ name: name, timestamp: new Date().toLocaleString() });
-        localStorage.setItem('attendance', JSON.stringify(attendance));
-
-        alert('Attendance recorded!');
-        form.reset();
-        displayAttendance();
-      } else {
-        alert('You are not within the required area.');
-      }
-    }
-  });
-
-  // Function to display attendance list
-  function displayAttendance() {
-    let attendance = JSON.parse(localStorage.getItem('attendance')) || {};
-    let output = '';
-
-    for (let date in attendance) {
-      output += `<h2>${date}</h2><ul>`;
-      attendance[date].forEach(entry => {
-        output += `<li>${entry.name} - ${entry.timestamp}</li>`;
       });
-      output += '</ul>';
     }
-    attendanceList.innerHTML = output;
-  }
+  </script>
+</head>
+<body>
+  <h1>Attendance Form</h1>
+  <form id="attendanceForm">
+    <input type="text" id="name" placeholder="Enter your name" required>
+    <button type="submit" id="submitButton" disabled>Submit</button>
+  </form>
 
-  // Display attendance on page load
-  displayAttendance();
+  <div id="attendanceList"></div>
+  <button id="installButton" style="display:none;">Install PWA</button> <!-- Install button for PWA -->
 
-  // PWA Install Prompt Section
-  window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent the mini-infobar from appearing on mobile
-    e.preventDefault();
-    // Stash the event so it can be triggered later.
-    deferredPrompt = e;
-    // Show the install button
-    installButton.style.display = 'block';
-    
-    installButton.addEventListener('click', () => {
-      // Hide the install button
-      installButton.style.display = 'none';
-      // Show the install prompt
-      deferredPrompt.prompt();
-      // Wait for the user to respond to the prompt
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the install prompt');
-        } else {
-          console.log('User dismissed the install prompt');
-        }
-        deferredPrompt = null;
-      });
-    });
-  });
-});
+  <!-- Firebase SDK -->
+  <script type="module">
+    // Firebase setup
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDVmQEP15M2vSWDzBXc1ySmQHhOtpZyGYw",
+      authDomain: "attendanceapp-a03ea.firebaseapp.com",
+      projectId: "attendanceapp-a03ea",
+      storageBucket: "attendanceapp-a03ea.appspot.com",
+      messagingSenderId: "422851265218",
+      appId: "1:422851265218:web:4a94c3930e2b43a0b0f15b",
+      measurementId: "G-WXLGMV0D6S"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+  </script>
+
+  <script src="scripts.js"></script>
+</body>
+</html>
