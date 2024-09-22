@@ -17,6 +17,35 @@
       });
     }
   </script>
+  <style>
+    /* Simple modal styles */
+    #locationModal {
+      display: none; 
+      position: fixed; 
+      z-index: 1000; 
+      left: 0; 
+      top: 0; 
+      width: 100%; 
+      height: 100%; 
+      background-color: rgba(0, 0, 0, 0.5); 
+      justify-content: center; 
+      align-items: center;
+    }
+    #modalContent {
+      background-color: white; 
+      padding: 20px; 
+      border-radius: 5px; 
+      text-align: center;
+    }
+    #closeModal {
+      cursor: pointer; 
+      background-color: #007BFF; 
+      color: white; 
+      border: none; 
+      padding: 10px; 
+      border-radius: 5px;
+    }
+  </style>
 </head>
 <body>
   <h1>Attendance Form</h1>
@@ -27,18 +56,21 @@
 
   <div id="attendanceList"></div>
   <button id="installButton" style="display:none;">Install PWA</button>
-  <div id="notification" style="color: red; margin-top: 10px;"></div> <!-- Notification area -->
 
-  <!-- Include the custom scripts.js file -->
+  <!-- Modal for location request -->
+  <div id="locationModal">
+    <div id="modalContent">
+      <h2>Location Access Required</h2>
+      <p>To mark your attendance, we need access to your location. Please allow location access in your browser.</p>
+      <button id="closeModal">Okay</button>
+    </div>
+  </div>
+
   <script src="scripts.js" type="module"></script>
-
-  <!-- Firebase and other logic inside the main JS module -->
   <script type="module">
-    // Import Firebase SDKs
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-    // Your web app's Firebase configuration  
     const firebaseConfig = {
       apiKey: "AIzaSyBFJrziRByYb0EwC2sYfP_cLtiQJlS02cY",
       authDomain: "attendance-38541.firebaseapp.com",
@@ -48,7 +80,6 @@
       appId: "1:439358946279:web:fe466a68db5e8ad77f1b42"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -58,12 +89,12 @@
       const submitButton = document.getElementById('submitButton');
       const attendanceList = document.getElementById('attendanceList');
       const installButton = document.getElementById('installButton');
-      const notification = document.getElementById('notification'); // Notification element
+      const locationModal = document.getElementById('locationModal');
+      const closeModal = document.getElementById('closeModal');
       let deferredPrompt;
 
       const targetLocation = { lat: 27.1962, lon: 78.0506 }; // Change to your target latitude and longitude
       const radius = 25; // Distance in meters
-      console.log("JavaScript is connected and running!");
 
       function getDistance(lat1, lon1, lat2, lon2) {
         const R = 6371e3; // Radius of Earth in meters
@@ -85,20 +116,16 @@
             navigator.geolocation.getCurrentPosition(
               (position) => {
                 const { latitude, longitude } = position.coords;
-                console.log(`User's Location: Latitude: ${latitude}, Longitude: ${longitude}`);
                 const distance = getDistance(latitude, longitude, targetLocation.lat, targetLocation.lon);
-                console.log(`Distance from target: ${distance} meters`);
                 resolve(distance <= radius);
               },
               (error) => {
-                console.error("Geolocation error: ", error);
-                notification.textContent = "Location access denied. Please enable location services.";
+                locationModal.style.display = 'flex'; // Show modal if there's an error
                 reject(false);
               }
             );
           } else {
-            console.error("Geolocation is not supported by this browser.");
-            notification.textContent = "Geolocation is not supported by your browser.";
+            locationModal.style.display = 'flex'; // Show modal if geolocation is not supported
             reject(false);
           }
         });
@@ -136,7 +163,6 @@
               alert('Attendance recorded!');
               form.reset();
               displayAttendance();
-              notification.textContent = ""; // Clear notification
             } catch (error) {
               console.error("Error adding document: ", error);
             }
@@ -160,6 +186,10 @@
       }
 
       displayAttendance();
+
+      closeModal.addEventListener('click', () => {
+        locationModal.style.display = 'none'; // Close the modal
+      });
 
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
