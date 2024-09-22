@@ -45,6 +45,17 @@
       padding: 10px; 
       border-radius: 5px;
     }
+    #installButton {
+      display: none; /* Initially hidden */
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+      margin-top: 20px; /* Add some margin for spacing */
+    }
   </style>
 </head>
 <body>
@@ -55,7 +66,7 @@
   </form>
 
   <div id="attendanceList"></div>
-  <button id="installButton" style="display:none;">Install PWA</button>
+  <button id="installButton">Install PWA</button> <!-- Install Button -->
 
   <!-- Modal for location request -->
   <div id="locationModal">
