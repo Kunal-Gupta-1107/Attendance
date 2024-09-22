@@ -1,17 +1,45 @@
-/* Style the submit button when active (before click) */
+/* Button Styles */
 #submitButton {
-  background-color: blue;
-  color: white;
+  background-color: blue; /* Initial blue color */
+  color: white; /* Text color */
   border: none;
   padding: 10px 20px;
-  font-size: 1em;
+  font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease; /* Smooth transition */
 }
 
-/* Style the submit button when disabled or clicked */
-#submitButton.loading {
-  background-color: white;
-  color: blue;
+#submitButton:disabled {
+  background-color: #ccc;
   cursor: not-allowed;
+}
+
+#submitButton.clicked {
+  background-color: white; /* Change to white when clicked */
+  color: blue; /* Change text color to blue when clicked */
+}
+
+/* Body and other styles */
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 50px;
+  background: linear-gradient(45deg, #f3ec78, #af4261);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+  100% { background-position: 0% 0%; }
+}
+
+form {
+  margin-top: 20px;
+}
+
+#attendanceList {
+  margin-top: 20px;
+  font-size: 1.2em;
 }
