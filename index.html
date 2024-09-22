@@ -27,6 +27,7 @@
 
   <div id="attendanceList"></div>
   <button id="installButton" style="display:none;">Install PWA</button>
+  <div id="notification" style="color: red; margin-top: 10px;"></div> <!-- Notification area -->
 
   <!-- Include the custom scripts.js file -->
   <script src="scripts.js" type="module"></script>
@@ -57,6 +58,7 @@
       const submitButton = document.getElementById('submitButton');
       const attendanceList = document.getElementById('attendanceList');
       const installButton = document.getElementById('installButton');
+      const notification = document.getElementById('notification'); // Notification element
       let deferredPrompt;
 
       const targetLocation = { lat: 27.1962, lon: 78.0506 }; // Change to your target latitude and longitude
@@ -90,11 +92,13 @@
               },
               (error) => {
                 console.error("Geolocation error: ", error);
+                notification.textContent = "Location access denied. Please enable location services.";
                 reject(false);
               }
             );
           } else {
             console.error("Geolocation is not supported by this browser.");
+            notification.textContent = "Geolocation is not supported by your browser.";
             reject(false);
           }
         });
@@ -132,6 +136,7 @@
               alert('Attendance recorded!');
               form.reset();
               displayAttendance();
+              notification.textContent = ""; // Clear notification
             } catch (error) {
               console.error("Error adding document: ", error);
             }
