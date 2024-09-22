@@ -16,13 +16,13 @@ body {
 
 /* Button Styles */
 #submitButton {
-  background-color: blue; /* Initial blue color */
-  color: white; /* Text color */
+  background-color: blue;
+  color: white;
   border: none;
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.3s ease; /* Smooth transition */
+  transition: background-color 0.3s ease;
 }
 
 #submitButton:disabled {
@@ -31,8 +31,8 @@ body {
 }
 
 #submitButton.clicked {
-  background-color: white; /* Change to white when clicked */
-  color: blue; /* Change text color to blue when clicked */
+  background-color: white;
+  color: blue;
 }
 
 /* Form Styles */
