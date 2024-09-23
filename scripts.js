@@ -73,13 +73,15 @@
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       const name = nameInput.value;
-      const today = new Date().toLocaleDateString();
+
+      // Use YYYY-MM-DD format for today's date
+      const today = new Date().toISOString().split('T')[0];
 
       const isInArea = await checkLocation();
 
       if (isInArea) {
         const isDuplicate = await checkDuplicate(name, today);
-        
+
         if (isDuplicate) {
           alert('Attendance for this name has already been recorded today.');
         } else {
@@ -104,18 +106,18 @@
     async function displayAttendance() {
       attendanceList.innerHTML = '';
 
-      // Get today's date in the format MM/DD/YYYY or as per your locale
-      const today = new Date().toLocaleDateString();
+      // Get today's date in YYYY-MM-DD format
+      const today = new Date().toISOString().split('T')[0];
 
       // Fetch all attendance data from Firestore
       const querySnapshot = await getDocs(collection(db, "attendance"));
 
       let output = '';
-      
+
       // Iterate over each attendance document
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        
+
         // Display only today's attendance by checking the date
         if (data.date === today) {
           output += `<li>${data.name} - ${data.timestamp.toDate().toLocaleString()}</li>`;
@@ -131,7 +133,7 @@
       e.preventDefault();
       deferredPrompt = e;
       installButton.style.display = 'block';
-      
+
       installButton.addEventListener('click', () => {
         installButton.style.display = 'none';
         deferredPrompt.prompt();
