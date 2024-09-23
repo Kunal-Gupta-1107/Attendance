@@ -26,10 +26,7 @@
     let deferredPrompt;
 
     const targetLocation = { lat: 27.1962, lon: 78.0506 }; // Home
-    //const targetLocation = { lat: 27.1862, lon: 78.0031 };// College Change to your target latitude and longitude
     const radius = 50; // Distance in meters
-    console.log("JavaScript is connected and running!");
-
 
     function getDistance(lat1, lon1, lat2, lon2) {
       const R = 6371e3; // Radius of Earth in meters
@@ -54,11 +51,11 @@
             resolve(distance <= radius);
           }, () => {
             reject(false);
-            console.log("JavaScript is connected and running!");
+            console.log("Geolocation access denied or failed.");
           });
         } else {
           reject(false);
-          console.log("JavaScript is connected and running!");
+          console.log("Geolocation not supported by browser.");
         }
       });
     }
@@ -94,7 +91,7 @@
             });
             alert('Attendance recorded!');
             form.reset();
-            displayAttendance();
+            displayAttendance(); // Refresh the attendance display after recording
           } catch (error) {
             console.error("Error adding document: ", error);
           }
@@ -106,18 +103,29 @@
 
     async function displayAttendance() {
       attendanceList.innerHTML = '';
+
+      // Get today's date in the format MM/DD/YYYY or as per your locale
+      const today = new Date().toLocaleDateString();
+
+      // Fetch all attendance data from Firestore
       const querySnapshot = await getDocs(collection(db, "attendance"));
-      
+
       let output = '';
+      
+      // Iterate over each attendance document
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        output += `<li>${data.name} - ${data.timestamp.toDate().toLocaleString()}</li>`;
+        
+        // Display only today's attendance by checking the date
+        if (data.date === today) {
+          output += `<li>${data.name} - ${data.timestamp.toDate().toLocaleString()}</li>`;
+        }
       });
-      
+
       attendanceList.innerHTML = output;
     }
 
-    displayAttendance();
+    displayAttendance(); // Initial call to display today's attendance on page load
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
