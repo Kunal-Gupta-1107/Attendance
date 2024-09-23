@@ -26,6 +26,7 @@
     let deferredPrompt;
 
     const targetLocation = { lat: 27.1962, lon: 78.0506 }; // Home
+    // const targetLocation = { lat: 27.1862, lon: 78.0031 }; // College
     const radius = 50; // Distance in meters
 
     function getDistance(lat1, lon1, lat2, lon2) {
