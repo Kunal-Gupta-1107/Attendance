@@ -1,227 +1,162 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Attendance Form</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="manifest" href="./manifest.json">
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
-          console.log('Service Worker registered with scope:', registration.scope);
-        }, function(error) {
-          console.log('Service Worker registration failed:', error);
-        });
-      });
+<script type="module">
+  // Import Firebase SDKs
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+  // Your web app's Firebase configuration  
+  const firebaseConfig = {
+    apiKey: "AIzaSyBFJrziRByYb0EwC2sYfP_cLtiQJlS02cY",
+    authDomain: "attendance-38541.firebaseapp.com",
+    projectId: "attendance-38541",
+    storageBucket: "attendance-38541.appspot.com",
+    messagingSenderId: "439358946279",
+    appId: "1:439358946279:web:fe466a68db5e8ad77f1b42"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('attendanceForm');
+    const nameInput = document.getElementById('name');
+    const codeInput = document.getElementById('attendanceCode'); // New input for the code
+    const submitButton = document.getElementById('submitButton');
+    const attendanceList = document.getElementById('attendanceList');
+    const installButton = document.getElementById('installButton');
+    let deferredPrompt;
+
+    const targetLocation = { lat: 27.1962, lon: 78.0506 }; // Home
+    const radius = 50; // Distance in meters
+
+    function getDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371e3; // Radius of Earth in meters
+      const φ1 = lat1 * Math.PI / 180;
+      const φ2 = lat2 * Math.PI / 180;
+      const Δφ = (lat2 - lat1) * Math.PI / 180;
+      const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+      const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                Math.cos(φ1) * Math.cos(φ2) *
+                Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c; // Distance in meters
     }
-  </script>
-  <style>
-    /* Simple modal styles */
-    #locationModal {
-      display: none; 
-      position: fixed; 
-      z-index: 1000; 
-      left: 0; 
-      top: 0; 
-      width: 100%; 
-      height: 100%; 
-      background-color: rgba(0, 0, 0, 0.5); 
-      justify-content: center; 
-      align-items: center;
-    }
-    #modalContent {
-      background-color: white; 
-      padding: 20px; 
-      border-radius: 5px; 
-      text-align: center;
-    }
-    #closeModal {
-      cursor: pointer; 
-      background-color: #007BFF; 
-      color: white; 
-      border: none; 
-      padding: 10px; 
-      border-radius: 5px;
-    }
-    #installButton {
-      display: none; /* Initially hidden */
-      padding: 10px 20px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      border-radius: 5px;
-      margin-top: 20px; /* Add some margin for spacing */
-    }
-  </style>
-</head>
-<body>
-  <h1>Attendance Form</h1>
-  <form id="attendanceForm">
-    <input type="text" id="name" placeholder="Enter your name" required>
-    <button type="submit" id="submitButton" disabled>Submit</button>
-  </form>
 
-  <div id="attendanceList"></div>
-  <button id="installButton">Install App</button> <!-- Install Button -->
-
-  <!-- Modal for location request -->
-  <div id="locationModal">
-    <div id="modalContent">
-      <h2>Location Access Required</h2>
-      <p>To mark your attendance, we need access to your location. Please allow location access in your browser.</p>
-      <button id="closeModal">Okay</button>
-    </div>
-  </div>
-
-  <script src="scripts.js" type="module"></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBFJrziRByYb0EwC2sYfP_cLtiQJlS02cY",
-      authDomain: "attendance-38541.firebaseapp.com",
-      projectId: "attendance-38541",
-      storageBucket: "attendance-38541.appspot.com",
-      messagingSenderId: "439358946279",
-      appId: "1:439358946279:web:fe466a68db5e8ad77f1b42"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const form = document.getElementById('attendanceForm');
-      const nameInput = document.getElementById('name');
-      const submitButton = document.getElementById('submitButton');
-      const attendanceList = document.getElementById('attendanceList');
-      const installButton = document.getElementById('installButton');
-      const locationModal = document.getElementById('locationModal');
-      const closeModal = document.getElementById('closeModal');
-      let deferredPrompt;
-
-      //const targetLocation = { lat: 27.1962, lon: 78.0506 }; // Home 
-      const targetLocation = { lat: 27.1862, lon: 78.0031 }; // Change to your target latitude and longitude
-      const radius = 100; // Distance in meters
-
-      function getDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; // Radius of Earth in meters
-        const φ1 = lat1 * Math.PI / 180;
-        const φ2 = lat2 * Math.PI / 180;
-        const Δφ = (lat2 - lat1) * Math.PI / 180;
-        const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-                  Math.cos(φ1) * Math.cos(φ2) *
-                  Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distance in meters
-      }
-
-      function checkLocation() {
-        return new Promise((resolve, reject) => {
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-              (position) => {
-                const { latitude, longitude } = position.coords;
-                const distance = getDistance(latitude, longitude, targetLocation.lat, targetLocation.lon);
-                resolve(distance <= radius);
-              },
-              (error) => {
-                locationModal.style.display = 'flex'; // Show modal if there's an error
-                reject(false);
-              }
-            );
-          } else {
-            locationModal.style.display = 'flex'; // Show modal if geolocation is not supported
+    function checkLocation() {
+      return new Promise((resolve, reject) => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((position) => {
+            const { latitude, longitude } = position.coords;
+            const distance = getDistance(latitude, longitude, targetLocation.lat, targetLocation.lon);
+            resolve(distance <= radius);
+          }, () => {
             reject(false);
-          }
-        });
-      }
-
-      async function checkDuplicate(name, date) {
-        const attendanceQuery = query(collection(db, "attendance"), where("name", "==", name), where("date", "==", date));
-        const querySnapshot = await getDocs(attendanceQuery);
-        return !querySnapshot.empty; // Returns true if there is a duplicate
-      }
-
-      nameInput.addEventListener('input', () => {
-        submitButton.disabled = !nameInput.value;
-      });
-
-      form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const name = nameInput.value;
-        const today = new Date().toLocaleDateString();
-
-        const isInArea = await checkLocation();
-
-        if (isInArea) {
-          const isDuplicate = await checkDuplicate(name, today);
-          
-          if (isDuplicate) {
-            alert('Attendance for this name has already been recorded today.');
-          } else {
-            try {
-              await addDoc(collection(db, "attendance"), {
-                name: name,
-                date: today,
-                timestamp: serverTimestamp()
-              });
-              alert('Attendance recorded!');
-              form.reset();
-              displayAttendance();
-            } catch (error) {
-              console.error("Error adding document: ", error);
-            }
-          }
+            console.log("Geolocation access denied or failed.");
+          });
         } else {
-          alert('You are not within the required area.');
+          reject(false);
+          console.log("Geolocation not supported by browser.");
+        }
+      });
+    }
+
+    async function checkDuplicate(name, date) {
+      const attendanceQuery = query(collection(db, "attendance"), where("name", "==", name), where("date", "==", date));
+      const querySnapshot = await getDocs(attendanceQuery);
+      return !querySnapshot.empty; // Returns true if there is a duplicate
+    }
+
+    nameInput.addEventListener('input', () => {
+      submitButton.disabled = !nameInput.value || !codeInput.value;
+    });
+
+    codeInput.addEventListener('input', () => {
+      submitButton.disabled = !nameInput.value || !codeInput.value;
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const name = nameInput.value;
+      const codeEntered = codeInput.value; // Get the entered code
+      const today = new Date().toLocaleDateString();
+
+      // Example of a valid attendance code (this should be dynamically generated)
+      const VALID_CODE = "ABC123"; // Change this to the dynamic code generated at the class location
+
+      // Check if the entered code matches the valid code
+      if (codeEntered !== VALID_CODE) {
+        alert('Invalid attendance code. Please check and try again.');
+        return;
+      }
+
+      const isInArea = await checkLocation();
+
+      if (isInArea) {
+        const isDuplicate = await checkDuplicate(name, today);
+        
+        if (isDuplicate) {
+          alert('Attendance for this name has already been recorded today.');
+        } else {
+          try {
+            await addDoc(collection(db, "attendance"), {
+              name: name,
+              date: today,
+              timestamp: serverTimestamp()
+            });
+            alert('Attendance recorded!');
+            form.reset();
+            displayAttendance(); // Refresh the attendance display after recording
+          } catch (error) {
+            console.error("Error adding document: ", error);
+          }
+        }
+      } else {
+        alert('You are not within the required area.');
+      }
+    });
+
+    async function displayAttendance() {
+      attendanceList.innerHTML = '';
+
+      // Get today's date
+      const today = new Date().toLocaleDateString();
+
+      // Fetch all attendance data from Firestore
+      const querySnapshot = await getDocs(collection(db, "attendance"));
+
+      let output = '';
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        
+        // Display only today's attendance by checking the date
+        if (data.date === today) {
+          output += `<li>${data.name} - ${data.timestamp.toDate().toLocaleString()}</li>`;
         }
       });
 
-      async function displayAttendance() {
-        attendanceList.innerHTML = '';
-        const querySnapshot = await getDocs(collection(db, "attendance"));
-        
-        let output = '';
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          output += `<li>${data.name} - ${data.timestamp.toDate().toLocaleString()}</li>`;
-        });
-        
-        attendanceList.innerHTML = output;
-      }
+      attendanceList.innerHTML = output;
+    }
 
-      displayAttendance();
+    displayAttendance(); // Initial call to display today's attendance on page load
 
-      closeModal.addEventListener('click', () => {
-        locationModal.style.display = 'none'; // Close the modal
-      });
-
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installButton.style.display = 'block';
-        
-        installButton.addEventListener('click', () => {
-          installButton.style.display = 'none';
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-              console.log('User accepted the install prompt');
-            } else {
-              console.log('User dismissed the install prompt');
-            }
-            deferredPrompt = null;
-          });
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installButton.style.display = 'block';
+      
+      installButton.addEventListener('click', () => {
+        installButton.style.display = 'none';
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+          } else {
+            console.log('User dismissed the install prompt');
+          }
+          deferredPrompt = null;
         });
       });
     });
-  </script>
-</body>
-</html>
+  });
+</script>
