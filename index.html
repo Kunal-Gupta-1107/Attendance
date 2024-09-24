@@ -200,7 +200,7 @@
             try {
               await addDoc(collection(db, "attendance"), {
                 name: name,
-                code: attendanceCode,
+                attendanceCode: attendanceCode,
                 date: today,
                 timestamp: serverTimestamp()
               });
@@ -216,116 +216,70 @@
         }
       });
 
-async function displayAttendance() {
-  attendanceList.innerHTML = ''; // Clear the current attendance list
-  const querySnapshot = await getDocs(collection(db, "attendance"));
-
-  const today = new Date(); // Get today's date object
-  const todayStringMMDD = today.toLocaleDateString('en-US'); // mm/dd/yyyy format
-  const todayStringDDMM = today.toLocaleDateString('en-GB'); // dd/mm/yyyy format
-
-  // Iterate through the attendance documents
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
-
-    let attendanceDate;
-
-    // Check if the date is in mm/dd/yyyy format
-    if (data.date.includes('/')) {
-      const dateParts = data.date.split('/');
-
-      if (dateParts.length === 3) {
-        // Try mm/dd/yyyy format
-        const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`); // YYYY-MM-DD format
-        if (mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
-          attendanceDate = mmddDate;
-        }
-
-        // Try dd/mm/yyyy format if mm/dd/yyyy didn't match today
-        const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`); // YYYY-MM-DD format
-        if (ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
-          attendanceDate = ddmmDate;
-        }
-      }
-    }
-
-    // If attendanceDate is valid and matches today's date
-    if (attendanceDate) {
-      const row = attendanceList.insertRow();
-      row.insertCell(0).textContent = data.name; // Name of the student
-      row.insertCell(1).textContent = data.attendanceCode; // Attendance code
-      row.insertCell(2).textContent = attendanceDate.toLocaleDateString(); // Shows the date only
-    }
-  });
-}
-
-
-      
-
-
-
       async function displayAttendance() {
-  attendanceList.innerHTML = ''; // Clear the current attendance list
-  const querySnapshot = await getDocs(collection(db, "attendance"));
+        attendanceList.innerHTML = ''; // Clear the current attendance list
+        const querySnapshot = await getDocs(collection(db, "attendance"));
 
-  const today = new Date(); // Get today's date object
-  const todayStringMMDD = today.toLocaleDateString('en-US'); // mm/dd/yyyy format
-  const todayStringDDMM = today.toLocaleDateString('en-GB'); // dd/mm/yyyy format
+        const today = new Date(); // Get today's date object
+        const todayStringMMDD = today.toLocaleDateString('en-US'); // mm/dd/yyyy format
 
-  const attendanceEntries = []; // Array to hold attendance entries
+        const attendanceEntries = []; // Array to hold attendance entries
 
-  // Iterate through the attendance documents
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
-    let attendanceDate;
+        // Iterate through the attendance documents
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const attendanceDate = new Date(data.timestamp.toDate()); // Convert Firestore Timestamp to Date
 
-    // Check if the date is in mm/dd/yyyy format
-    if (data.date.includes('/')) {
-      const dateParts = data.date.split('/');
+          // Only include entries from today
+          if (attendanceDate.toLocaleDateString() === today.toLocaleDateString()) {
+            // Add attendance entry to the array
+            attendanceEntries.push({
+              name: data.name,
+              attendanceCode: data.attendanceCode,
+              timestamp: attendanceDate.toLocaleTimeString(), // Format timestamp
+            });
+          }
+        });
 
-      if (dateParts.length === 3) {
-        // Try mm/dd/yyyy format
-        const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`); // YYYY-MM-DD format
-        if (mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
-          attendanceDate = mmddDate;
-        }
-
-        // Try dd/mm/yyyy format if mm/dd/yyyy didn't match today
-        const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`); // YYYY-MM-DD format
-        if (ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
-          attendanceDate = ddmmDate;
-        }
+        // Populate the attendance table with the entries
+        attendanceEntries.forEach(entry => {
+          const row = attendanceList.insertRow();
+          row.insertCell(0).innerText = entry.name;
+          row.insertCell(1).innerText = entry.attendanceCode;
+          row.insertCell(2).innerText = entry.timestamp;
+        });
       }
-    }
 
-    // If attendanceDate is valid and matches today's date
-    if (attendanceDate) {
-      // Add attendance entry to the array
-      attendanceEntries.push({
-        name: data.name,
-        attendanceCode: data.attendanceCode,
-        date: attendanceDate,
-        timestamp: data.timestamp // Ensure this is a Firestore Timestamp
+      // Close modal button functionality
+      closeModal.addEventListener('click', () => {
+        locationModal.style.display = 'none';
       });
-    }
-  });
 
-  // Sort the attendance entries by timestamp (down to the second)
-  attendanceEntries.sort((a, b) => {
-    return a.timestamp.seconds - b.timestamp.seconds || a.timestamp.nanoseconds - b.timestamp.nanoseconds;
-  });
+      // Install PWA button functionality
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installButton.style.display = 'block'; // Show the install button
+      });
 
-  // Display the sorted attendance entries
-  attendanceEntries.forEach(entry => {
-    const row = attendanceList.insertRow();
-    row.insertCell(0).textContent = entry.name; // Name of the student
-    row.insertCell(1).textContent = entry.attendanceCode; // Attendance code
-    row.insertCell(2).textContent = entry.date.toLocaleDateString(); // Shows the date only
-  });
-}
+      installButton.addEventListener('click', () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+              console.log('User accepted the A2HS prompt');
+            } else {
+              console.log('User dismissed the A2HS prompt');
+            }
+            deferredPrompt = null; // Clear the deferred prompt
+            installButton.style.display = 'none'; // Hide the button again
+          });
+        }
+      });
 
-displayAttendance();
-
+      // Display the attendance records when the page loads
+      displayAttendance();
+    });
   </script>
 </body>
 </html>
