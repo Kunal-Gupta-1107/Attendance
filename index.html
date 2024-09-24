@@ -18,35 +18,35 @@
         }
     </script>
     <style>
-        /* Style Definitions */
+        /* Simple modal styles */
         #locationModal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0, 0, 0, 0.5); 
+            justify-content: center; 
             align-items: center;
         }
         #modalContent {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
+            background-color: white; 
+            padding: 20px; 
+            border-radius: 5px; 
             text-align: center;
         }
         #closeModal {
-            cursor: pointer;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 10px;
+            cursor: pointer; 
+            background-color: #007BFF; 
+            color: white; 
+            border: none; 
+            padding: 10px; 
             border-radius: 5px;
         }
         #installButton {
-            display: none;
+            display: none; /* Initially hidden */
             padding: 10px 20px;
             background-color: #28a745;
             color: white;
@@ -54,7 +54,7 @@
             cursor: pointer;
             font-size: 16px;
             border-radius: 5px;
-            margin-top: 20px;
+            margin-top: 20px; /* Add some margin for spacing */
         }
         table {
             width: 100%;
@@ -120,6 +120,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Hardcoded attendance code
         const HARD_CODED_CODE = "ABC123"; // Change this code as needed
         let currentCode = HARD_CODED_CODE;
 
@@ -134,10 +135,9 @@
             const closeModal = document.getElementById('closeModal');
             let deferredPrompt;
 
-            const targetLocation = { lat: 27.1862, lon: 78.0031 }; // Update target latitude and longitude
+            const targetLocation = { lat: 27.1862, lon: 78.0031 }; // Change to your target latitude and longitude
             const radius = 100; // Distance in meters
 
-            // Helper function to calculate distance using latitude and longitude
             function getDistance(lat1, lon1, lat2, lon2) {
                 const R = 6371e3; // Radius of Earth in meters
                 const φ1 = lat1 * Math.PI / 180;
@@ -158,14 +158,11 @@
                         navigator.geolocation.getCurrentPosition(
                             (position) => {
                                 const { latitude, longitude } = position.coords;
-                              
                                 const distance = getDistance(latitude, longitude, targetLocation.lat, targetLocation.lon);
-                                console.log("Distance to target:", distance); // Log distance for debugging
                                 resolve(distance <= radius);
                             },
                             (error) => {
                                 locationModal.style.display = 'flex';
-                                console.log("Geolocation error: ", error.message); // Log geolocation error
                                 reject(false);
                             }
                         );
@@ -176,28 +173,6 @@
                 });
             }
 
-            // Helper function to parse and normalize date format
-            function normalizeDate(dateString) {
-                const dateParts = dateString.split(/[\/\-]/);
-                if (dateParts.length === 3) {
-                    const day = parseInt(dateParts[0], 10);
-                    const month = parseInt(dateParts[1], 10);
-                    const year = parseInt(dateParts[2], 10);
-                    if (year < 1000) {
-                        // Invalid year
-                        return null;
-                    }
-                    if (month > 12) {
-                        // Assuming dd/mm/yyyy format
-                        return `${year}-${('0' + month).slice(-2)}-${('0' + day).slice(-2)}`;
-                    }
-                    // Assuming mm/dd/yyyy format
-                    return `${year}-${('0' + month).slice(-2)}-${('0' + day).slice(-2)}`;
-                }
-                return null; // Invalid format
-            }
-
-            // Check for duplicate attendance
             async function checkDuplicate(name, date) {
                 const attendanceQuery = query(collection(db, "attendance"), where("name", "==", name), where("date", "==", date));
                 const querySnapshot = await getDocs(attendanceQuery);
@@ -209,88 +184,82 @@
                     name: name,
                     attendanceCode: attendanceCode,
                     timestamp: serverTimestamp(),
-                    date: new Date().toLocaleDateString()
+                    date: new Date().toLocaleDateString() // Save today's date
                 });
             }
 
-            // Filter and display today's attendance records
             async function displayAttendance() {
-                attendanceList.innerHTML = '';
+                attendanceList.innerHTML = ''; // Clear the current attendance list
                 const querySnapshot = await getDocs(collection(db, "attendance"));
 
-                const today = new Date();
-                const normalizedToday = `${today.getFullYear()}-${('0' + (today.getMonth() + 1)).slice(-2)}-${('0' + today.getDate()).slice(-2)}`;
+                const today = new Date(); // Get today's date object
+                const todayStringMMDD = today.toLocaleDateString('en-US'); // mm/dd/yyyy format
+                const todayStringDDMM = today.toLocaleDateString('en-GB'); // dd/mm/yyyy format
 
+                // Iterate through the attendance documents
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    const recordDate = normalizeDate(data.date);
-                    
-                    if (recordDate === normalizedToday) {
-                        const row = attendanceList.insertRow();
-                        const nameCell = row.insertCell(0);
-                        const codeCell = row.insertCell(1);
-                        const timestampCell = row.insertCell(2);
 
-                        nameCell.textContent = data.name;
-                        codeCell.textContent = data.attendanceCode;
-                        timestampCell.textContent = new Date(data.timestamp.seconds * 1000).toLocaleString();
+                    let attendanceDate;
+
+                    // Check if the date is in mm/dd/yyyy format
+                    if (data.date.includes('/')) {
+                        const dateParts = data.date.split('/');
+
+                        if (dateParts.length === 3) {
+                            // Try mm/dd/yyyy format
+                            const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`); // YYYY-MM-DD format
+                            if (mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
+                                attendanceDate = mmddDate;
+                            }
+
+                            // Try dd/mm/yyyy format if mm/dd/yyyy didn't match today
+                            const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`); // YYYY-MM-DD format
+                            if (ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
+                                attendanceDate = ddmmDate;
+                            }
+                        }
+                    }
+
+                    // If attendanceDate is valid and matches today's date
+                    if (attendanceDate) {
+                        const row = attendanceList.insertRow();
+                        row.insertCell(0).textContent = data.name; // Name of the student
+                        row.insertCell(1).textContent = data.attendanceCode; // Attendance code
+                        row.insertCell(2).textContent = attendanceDate.toLocaleDateString(); // Shows the date only
                     }
                 });
             }
 
-            form.addEventListener('input', () => {
-                submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
-            });
-
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const name = nameInput.value.trim();
-                const attendanceCode = codeInput.value.trim();
-
-                if (attendanceCode !== currentCode) {
-                    alert("Incorrect attendance code!");
-                    return;
-                }
-
-                const locationCheck = await checkLocation();
-                if (!locationCheck) {
-                    alert("You are not within the required location range.");
-                    return;
-                }
-
-                const today = new Date().toLocaleDateString();
-                const isDuplicate = await checkDuplicate(name, today);
-                if (isDuplicate) {
-                    alert("You have already marked attendance today.");
-                    return;
-                }
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const name = nameInput.value;
+                const attendanceCode = codeInput.value;
 
                 try {
-                    await addAttendance(name, attendanceCode);
-                    displayAttendance(); // Refresh the attendance list
-                    form.reset();
-                    submitButton.disabled = true;
+                    const isWithinRadius = await checkLocation();
+                    if (isWithinRadius) {
+                        const dateString = new Date().toLocaleDateString();
+                        const isDuplicate = await checkDuplicate(name, dateString);
+                        if (!isDuplicate) {
+                            await addAttendance(name, currentCode);
+                            displayAttendance();
+                            alert('Attendance marked successfully!');
+                        } else {
+                            alert('Attendance for today has already been marked for this name.');
+                        }
+                    } else {
+                        alert('You are not in the required location.');
+                    }
                 } catch (error) {
-                    console.error("Error adding attendance:", error);
+                    console.error('Error marking attendance:', error);
+                } finally {
+                    form.reset();
                 }
             });
 
             closeModal.addEventListener('click', () => {
                 locationModal.style.display = 'none';
-            });
-
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                installButton.style.display = 'block';
-            });
-
-            installButton.addEventListener('click', async () => {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                console.log(`User response to the install prompt: ${outcome}`);
-                deferredPrompt = null;
-                installButton.style.display = 'none';
             });
 
             displayAttendance();
