@@ -305,13 +305,15 @@ async function displayAttendance() {
         name: data.name,
         attendanceCode: data.attendanceCode,
         date: attendanceDate,
-        timestamp: data.timestamp // Assuming this exists in your data
+        timestamp: data.timestamp // Ensure this is a Firestore Timestamp
       });
     }
   });
 
-  // Sort the attendance entries by timestamp
-  attendanceEntries.sort((a, b) => a.timestamp - b.timestamp);
+  // Sort the attendance entries by timestamp (down to the second)
+  attendanceEntries.sort((a, b) => {
+    return a.timestamp.seconds - b.timestamp.seconds || a.timestamp.nanoseconds - b.timestamp.nanoseconds;
+  });
 
   // Display the sorted attendance entries
   attendanceEntries.forEach(entry => {
