@@ -216,24 +216,22 @@
         }
       });
 
-      async function displayAttendance() {
+async function displayAttendance() {
   attendanceList.innerHTML = ''; // Clear the current attendance list
   const querySnapshot = await getDocs(collection(db, "attendance"));
 
-  // Get today's date in DD/MM/YYYY format
   const today = new Date();
-  const formattedToday = today.toLocaleDateString('en-GB'); // Formats to DD/MM/YYYY
+  const formattedToday = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`; // Format: MM/DD/YYYY
 
   // Iterate through the attendance documents
   querySnapshot.forEach((doc) => {
     const data = doc.data();
 
-    // Check if the date is today in DD/MM/YYYY format before displaying
+    // Check if the date matches today in MM/DD/YYYY format
     if (data.date === formattedToday) {
       const row = attendanceList.insertRow();
       row.insertCell(0).textContent = data.name; // Name of the student
-      row.insertCell(1).textContent = data.code; // Attendance code (if you have it)
-      row.insertCell(2).textContent = data.timestamp.toDate().toLocaleDateString('en-GB'); // Only shows the date
+      row.insertCell(1).textContent = data.timestamp.toDate().toLocaleDateString(); // Only shows the date
     }
   });
 }
