@@ -234,7 +234,7 @@
             const entry = doc.data();
             const row = attendanceList.insertRow();
             row.insertCell(0).innerText = entry.name;
-            row.insertCell(1).innerText = entry.attendanceCode;
+            row.insertCell(1).innerText = "Hidden";
             row.insertCell(2).innerText = new Date(entry.timestamp.seconds * 1000).toLocaleString(); // Format timestamp
           });
         });
