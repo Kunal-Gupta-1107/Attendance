@@ -253,6 +253,26 @@
           date: todayDate // Store today's date
         });
 
+        const isInArea = await checkLocation();
+
+        if (isInArea) {
+          const isDuplicate = await checkDuplicate(name, today);
+          if (!isDuplicate) {
+            await addDoc(collection(db, "attendance"), {
+              name: name,
+              attendanceCode: attendanceCode,
+              timestamp: serverTimestamp(),
+              date: today
+            });
+            alert('Attendance marked successfully!');
+            displayAttendance();
+          } else {
+            alert('You have already marked attendance for today.');
+          }
+        } else {
+          alert('You are not in the designated attendance area.');
+        }
+
         // Clear form
         nameInput.value = '';
         codeInput.value = '';
