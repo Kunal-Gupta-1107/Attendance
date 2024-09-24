@@ -195,7 +195,7 @@
                     const data = doc.data();
                     const row = attendanceList.insertRow();
                     row.insertCell(0).textContent = data.name;
-                    row.insertCell(1).textContent = data.attendanceCode;
+                    row.insertCell(1).textContent = "Hidden";
                     row.insertCell(2).textContent = new Date(data.timestamp.toDate()).toLocaleString(); // Convert Firestore timestamp to date
                 });
             }
