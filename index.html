@@ -221,23 +221,33 @@ async function displayAttendance() {
   const querySnapshot = await getDocs(collection(db, "attendance"));
 
   const today = new Date(); // Get today's date object
-  const todayString = today.toLocaleDateString(); // Get today's date in the local format
+  const todayStringMMDD = today.toLocaleDateString('en-US'); // mm/dd/yyyy format
+  const todayStringDDMM = today.toLocaleDateString('en-GB'); // dd/mm/yyyy format
 
   // Iterate through the attendance documents
   querySnapshot.forEach((doc) => {
     const data = doc.data();
 
-    // Assume the stored date is in a format that can be parsed correctly
-    const attendanceDate = new Date(data.date); // Create a Date object from the stored date
-    const attendanceDateString = attendanceDate.toLocaleDateString(); // Normalize the attendance date format
+    // Check if the date is in mm/dd/yyyy format
+    const datePartsMMDD = data.date.split('/');
+    let attendanceDate;
+    if (datePartsMMDD.length === 3) {
+      // Convert the stored date to a Date object (mm/dd/yyyy)
+      attendanceDate = new Date(`${datePartsMMDD[2]}-${datePartsMMDD[0]}-${datePartsMMDD[1]}`); // YYYY-MM-DD format
+    } else {
+      // Check if the date is in dd/mm/yyyy format
+      const datePartsDDMM = data.date.split('/');
+      if (datePartsDDMM.length === 3) {
+        attendanceDate = new Date(`${datePartsDDMM[2]}-${datePartsDDMM[1]}-${datePartsDDMM[0]}`); // YYYY-MM-DD format
+      }
+    }
 
-    // Check if the normalized attendance date is today
-    if (attendanceDateString === todayString) {
-      // Create a table row
+    // If attendanceDate is valid, check if it's today
+    if (attendanceDate && attendanceDate.toLocaleDateString() === today.toLocaleDateString()) {
       const row = attendanceList.insertRow();
       row.insertCell(0).textContent = data.name; // Name of the student
-      row.insertCell(1).textContent = data.code || "N/A"; // Attendance code, default to "N/A" if not available
-      row.insertCell(2).textContent = attendanceDate.toLocaleDateString(); // Display the date only
+      row.insertCell(1).textContent = attendanceDate.toLocaleDateString(); // Shows the date only
+      row.insertCell(2).textContent = data.attendanceCode; // Attendance code
     }
   });
 }
