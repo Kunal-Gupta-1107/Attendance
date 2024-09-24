@@ -264,31 +264,66 @@ async function displayAttendance() {
 
 
 
-      displayAttendance();
+      async function displayAttendance() {
+  attendanceList.innerHTML = ''; // Clear the current attendance list
+  const querySnapshot = await getDocs(collection(db, "attendance"));
 
-      closeModal.addEventListener('click', () => {
-        locationModal.style.display = 'none'; // Close the modal
-      });
+  const today = new Date(); // Get today's date object
+  const todayStringMMDD = today.toLocaleDateString('en-US'); // mm/dd/yyyy format
+  const todayStringDDMM = today.toLocaleDateString('en-GB'); // dd/mm/yyyy format
 
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installButton.style.display = 'block';
-        
-        installButton.addEventListener('click', () => {
-          installButton.style.display = 'none';
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-              console.log('User accepted the install prompt');
-            } else {
-              console.log('User dismissed the install prompt');
-            }
-            deferredPrompt = null;
-          });
-        });
+  const attendanceEntries = []; // Array to hold attendance entries
+
+  // Iterate through the attendance documents
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+    let attendanceDate;
+
+    // Check if the date is in mm/dd/yyyy format
+    if (data.date.includes('/')) {
+      const dateParts = data.date.split('/');
+
+      if (dateParts.length === 3) {
+        // Try mm/dd/yyyy format
+        const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`); // YYYY-MM-DD format
+        if (mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
+          attendanceDate = mmddDate;
+        }
+
+        // Try dd/mm/yyyy format if mm/dd/yyyy didn't match today
+        const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`); // YYYY-MM-DD format
+        if (ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
+          attendanceDate = ddmmDate;
+        }
+      }
+    }
+
+    // If attendanceDate is valid and matches today's date
+    if (attendanceDate) {
+      // Add attendance entry to the array
+      attendanceEntries.push({
+        name: data.name,
+        attendanceCode: data.attendanceCode,
+        date: attendanceDate,
+        timestamp: data.timestamp // Assuming this exists in your data
       });
-    });
+    }
+  });
+
+  // Sort the attendance entries by timestamp
+  attendanceEntries.sort((a, b) => a.timestamp - b.timestamp);
+
+  // Display the sorted attendance entries
+  attendanceEntries.forEach(entry => {
+    const row = attendanceList.insertRow();
+    row.insertCell(0).textContent = entry.name; // Name of the student
+    row.insertCell(1).textContent = entry.attendanceCode; // Attendance code
+    row.insertCell(2).textContent = entry.date.toLocaleDateString(); // Shows the date only
+  });
+}
+
+displayAttendance();
+
   </script>
 </body>
 </html>
