@@ -231,35 +231,55 @@
                 });
             }
 
-            form.addEventListener('submit', async (event) => {
-                event.preventDefault();
-                const name = nameInput.value;
-                const attendanceCode = codeInput.value;
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = nameInput.value.trim();
+                const attendanceCode = codeInput.value.trim();
+
+                if (attendanceCode !== currentCode) {
+                    alert("Incorrect attendance code!");
+                    return;
+                }
+
+                const locationCheck = await checkLocation();
+                if (!locationCheck) {
+                    alert("You are not within the required location range.");
+                    return;
+                }
+
+                const today = new Date().toLocaleDateString();
+                const isDuplicate = await checkDuplicate(name, today);
+                if (isDuplicate) {
+                    alert("You have already marked attendance today.");
+                    return;
+                }
 
                 try {
-                    const isWithinRadius = await checkLocation();
-                    if (isWithinRadius) {
-                        const dateString = new Date().toLocaleDateString();
-                        const isDuplicate = await checkDuplicate(name, dateString);
-                        if (!isDuplicate) {
-                            await addAttendance(name, currentCode);
-                            displayAttendance();
-                            alert('Attendance marked successfully!');
-                        } else {
-                            alert('Attendance for today has already been marked for this name.');
-                        }
-                    } else {
-                        alert('You are not in the required location.');
-                    }
-                } catch (error) {
-                    console.error('Error marking attendance:', error);
-                } finally {
+                    await addAttendance(name, attendanceCode);
+                    displayAttendance(); // Refresh the attendance list
                     form.reset();
+                    submitButton.disabled = true;
+                } catch (error) {
+                    console.error("Error adding attendance:", error);
                 }
             });
 
             closeModal.addEventListener('click', () => {
                 locationModal.style.display = 'none';
+            });
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installButton.style.display = 'block';
+            });
+
+            installButton.addEventListener('click', async () => {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`User response to the install prompt: ${outcome}`);
+                deferredPrompt = null;
+                installButton.style.display = 'none';
             });
 
             displayAttendance();
