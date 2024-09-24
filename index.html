@@ -220,18 +220,23 @@ async function displayAttendance() {
   attendanceList.innerHTML = ''; // Clear the current attendance list
   const querySnapshot = await getDocs(collection(db, "attendance"));
 
-  const today = new Date();
-  const formattedToday = `${today.getMonth() + 1}/${today.getDate()}/${today.getFullYear()}`; // Format: MM/DD/YYYY
+  const today = new Date(); // Get today's date object
+  const todayString = today.toLocaleDateString(); // Get today's date in mm/dd/yyyy format
 
   // Iterate through the attendance documents
   querySnapshot.forEach((doc) => {
     const data = doc.data();
 
-    // Check if the date matches today in MM/DD/YYYY format
-    if (data.date === formattedToday) {
+    // Convert the stored date to a Date object
+    const attendanceDate = new Date(data.date);
+    const attendanceDateString = attendanceDate.toLocaleDateString(); // Normalize date format
+
+    // Check if the normalized attendance date is today
+    if (attendanceDateString === todayString) {
       const row = attendanceList.insertRow();
       row.insertCell(0).textContent = data.name; // Name of the student
-      row.insertCell(1).textContent = data.timestamp.toDate().toLocaleDateString(); // Only shows the date
+      row.insertCell(1).textContent = data.code; // Attendance code (if you have it)
+      row.insertCell(2).textContent = attendanceDate.toLocaleDateString(); // Shows the date only
     }
   });
 }
