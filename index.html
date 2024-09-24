@@ -18,7 +18,6 @@
     }
   </script>
   <style>
-    /* Simple modal styles */
     #locationModal {
       display: none; 
       position: fixed; 
@@ -46,7 +45,7 @@
       border-radius: 5px;
     }
     #installButton {
-      display: none; /* Initially hidden */
+      display: none;
       padding: 10px 20px;
       background-color: #28a745;
       color: white;
@@ -54,7 +53,7 @@
       cursor: pointer;
       font-size: 16px;
       border-radius: 5px;
-      margin-top: 20px; /* Add some margin for spacing */
+      margin-top: 20px;
     }
     table {
       width: 100%;
@@ -92,9 +91,8 @@
     </tbody>
   </table>
 
-  <button id="installButton">Install App</button> <!-- Install Button -->
+  <button id="installButton">Install App</button>
 
-  <!-- Modal for location request -->
   <div id="locationModal">
     <div id="modalContent">
       <h2>Location Access Required</h2>
@@ -120,8 +118,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Hardcoded attendance code
-    const HARD_CODED_CODE = "ABC123"; // Change this code as needed
+    const HARD_CODED_CODE = "ABC123";
     let currentCode = HARD_CODED_CODE;
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -135,11 +132,11 @@
       const closeModal = document.getElementById('closeModal');
       let deferredPrompt;
 
-      const targetLocation = { lat: 27.1862, lon: 78.0031 }; // Change to your target latitude and longitude
-      const radius = 100; // Distance in meters
+      const targetLocation = { lat: 27.1862, lon: 78.0031 }; 
+      const radius = 100; 
 
       function getDistance(lat1, lon1, lat2, lon2) {
-        const R = 6371e3; // Radius of Earth in meters
+        const R = 6371e3; 
         const φ1 = lat1 * Math.PI / 180;
         const φ2 = lat2 * Math.PI / 180;
         const Δφ = (lat2 - lat1) * Math.PI / 180;
@@ -149,7 +146,7 @@
                   Math.cos(φ1) * Math.cos(φ2) *
                   Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return R * c; // Distance in meters
+        return R * c; 
       }
 
       function checkLocation() {
@@ -162,12 +159,12 @@
                 resolve(distance <= radius);
               },
               (error) => {
-                locationModal.style.display = 'flex'; // Show modal if there's an error
+                locationModal.style.display = 'flex'; 
                 reject(false);
               }
             );
           } else {
-            locationModal.style.display = 'flex'; // Show modal if geolocation is not supported
+            locationModal.style.display = 'flex'; 
             reject(false);
           }
         });
@@ -176,29 +173,26 @@
       async function checkDuplicate(name, date) {
         const attendanceQuery = query(collection(db, "attendance"), where("name", "==", name), where("date", "==", date));
         const querySnapshot = await getDocs(attendanceQuery);
-        return !querySnapshot.empty; // Returns true if there is a duplicate
+        return !querySnapshot.empty; 
       }
 
       function parseDate(dateString) {
         const parts = dateString.split('/');
         let day, month, year;
 
-        // Check if the input is in mm/dd/yyyy or dd/mm/yyyy format
         if (parts.length === 3) {
-          // Assume it's mm/dd/yyyy format
           if (parseInt(parts[0]) <= 12) {
             month = parseInt(parts[0]);
             day = parseInt(parts[1]);
             year = parseInt(parts[2]);
           } else {
-            // Assume it's dd/mm/yyyy format
             day = parseInt(parts[0]);
             month = parseInt(parts[1]);
             year = parseInt(parts[2]);
           }
         }
 
-        return new Date(year, month - 1, day); // Create a Date object
+        return new Date(year, month - 1, day); 
       }
 
       function isToday(date) {
@@ -222,114 +216,41 @@
         const attendanceCode = codeInput.value;
         const today = new Date().toLocaleDateString();
 
-        // Validate the entered code against the hardcoded code
         if (attendanceCode !== currentCode) {
           alert('Invalid attendance code.');
           return;
         }
 
-        // Check location
         const isInLocation = await checkLocation();
         if (!isInLocation) {
           alert('You must be within the designated location to mark attendance.');
           return;
         }
 
-        // Check for duplicates
-        const todayDate = today; // Get today's date in the correct format
-        const dateFormatted = today; // Using the same format for Firestore
-
-        const isDuplicate = await checkDuplicate(name, dateFormatted);
+        const todayDate = today; 
+        const isDuplicate = await checkDuplicate(name, todayDate);
         if (isDuplicate) {
           alert('You have already marked attendance today.');
           return;
         }
 
-        // Add attendance to Firestore
         await addDoc(collection(db, "attendance"), {
           name: name,
           attendanceCode: attendanceCode,
           timestamp: serverTimestamp(),
-          date: todayDate // Store today's date
+          date: todayDate 
         });
 
-        const isInArea = await checkLocation();
+        alert('Attendance marked successfully!');
 
-        if (isInArea) {
-          const isDuplicate = await checkDuplicate(name, today);
-          if (!isDuplicate) {
-            await addDoc(collection(db, "attendance"), {
-              name: name,
-              attendanceCode: attendanceCode,
-              timestamp: serverTimestamp(),
-              date: today
-            });
-            alert('Attendance marked successfully!');
-            displayAttendance();
-          } else {
-            alert('You have already marked attendance for today.');
-          }
-        } else {
-          alert('You are not in the designated attendance area.');
-        }
-
-        // Clear form
         nameInput.value = '';
         codeInput.value = '';
         submitButton.disabled = true;
-
-        // Refresh attendance records
-        displayAttendance();
       });
 
-      async function displayAttendance() {
-        // Clear existing rows
-        attendanceList.innerHTML = '';
-
-        const snapshot = await getDocs(collection(db, "attendance"));
-        snapshot.forEach((doc) => {
-          const entry = doc.data();
-          const entryDate = parseDate(entry.date);
-
-          // Only display today's attendance
-          if (isToday(entryDate)) {
-            const row = attendanceList.insertRow();
-            row.insertCell(0).innerText = entry.name;
-            row.insertCell(1).innerText = entry.attendanceCode;
-            row.insertCell(2).innerText = new Date(entry.timestamp.seconds * 1000).toLocaleString(); // Format timestamp
-          }
-        });
-      }
-
-      // Close modal button functionality
       closeModal.addEventListener('click', () => {
         locationModal.style.display = 'none';
       });
-
-      // Install PWA button functionality
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        installButton.style.display = 'block'; // Show the install button
-      });
-
-      installButton.addEventListener('click', () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-              console.log('User accepted the A2HS prompt');
-            } else {
-              console.log('User dismissed the A2HS prompt');
-            }
-            deferredPrompt = null; // Clear the deferred prompt
-            installButton.style.display = 'none'; // Hide the button again
-          });
-        }
-      });
-
-      // Display the attendance records when the page loads
-      displayAttendance();
     });
   </script>
 </body>
