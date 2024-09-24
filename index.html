@@ -178,19 +178,12 @@
 
       function parseDate(dateString) {
         const parts = dateString.split('/');
-        let day, month, year;
+        if (parts.length !== 3) return null; 
 
-        if (parts.length === 3) {
-          if (parseInt(parts[0]) <= 12) {
-            month = parseInt(parts[0]);
-            day = parseInt(parts[1]);
-            year = parseInt(parts[2]);
-          } else {
-            day = parseInt(parts[0]);
-            month = parseInt(parts[1]);
-            year = parseInt(parts[2]);
-          }
-        }
+        let day, month, year;
+        day = parseInt(parts[1]);
+        month = parseInt(parts[0]);
+        year = parseInt(parts[2]);
 
         return new Date(year, month - 1, day); 
       }
@@ -227,7 +220,7 @@
           return;
         }
 
-        const todayDate = today; 
+        const todayDate = today;
         const isDuplicate = await checkDuplicate(name, todayDate);
         if (isDuplicate) {
           alert('You have already marked attendance today.');
