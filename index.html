@@ -73,7 +73,6 @@
 </head>
 <body>
   <h1>Attendance Form</h1>
-  <div id="codeDisplay">Current Code: <span id="currentCode"></span></div>
   <form id="attendanceForm">
     <input type="text" id="name" placeholder="Enter your name" required>
     <input type="text" id="attendanceCode" placeholder="Enter Attendance Code" required>
@@ -121,19 +120,9 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const SECRET_KEY = "YourSecretKey"; // Change this key as needed
-    let currentCode = "";
-
-    function generateCode() {
-      const timestamp = Math.floor(Date.now() / 1000); // Get the current timestamp in seconds
-      const code = btoa(timestamp + SECRET_KEY).substring(0, 6); // Encode with base64 and take first 6 characters
-      return code;
-    }
-
-    function updateCode() {
-      currentCode = generateCode();
-      document.getElementById('currentCode').innerText = currentCode;
-    }
+    // Hardcoded attendance code
+    const HARD_CODED_CODE = "ABC123"; // Change this code as needed
+    let currentCode = HARD_CODED_CODE;
 
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('attendanceForm');
@@ -148,10 +137,6 @@
 
       const targetLocation = { lat: 27.1862, lon: 78.0031 }; // Change to your target latitude and longitude
       const radius = 100; // Distance in meters
-
-      // Generate the initial code and update every minute
-      updateCode();
-      setInterval(updateCode, 60000); // Update code every minute
 
       function getDistance(lat1, lon1, lat2, lon2) {
         const R = 6371e3; // Radius of Earth in meters
@@ -208,7 +193,7 @@
         const attendanceCode = codeInput.value;
         const today = new Date().toLocaleDateString();
 
-        // Validate the entered code against the current code
+        // Validate the entered code against the hardcoded code
         if (attendanceCode !== currentCode) {
           alert('Invalid attendance code. Please check the code and try again.');
           return;
