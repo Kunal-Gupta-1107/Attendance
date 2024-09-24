@@ -73,6 +73,7 @@
 </head>
 <body>
   <h1>Attendance Form</h1>
+  <div id="codeDisplay">Current Code: <span id="currentCode"></span></div>
   <form id="attendanceForm">
     <input type="text" id="name" placeholder="Enter your name" required>
     <input type="text" id="attendanceCode" placeholder="Enter Attendance Code" required>
@@ -120,6 +121,20 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    const SECRET_KEY = "YourSecretKey"; // Change this key as needed
+    let currentCode = "";
+
+    function generateCode() {
+      const timestamp = Math.floor(Date.now() / 1000); // Get the current timestamp in seconds
+      const code = btoa(timestamp + SECRET_KEY).substring(0, 6); // Encode with base64 and take first 6 characters
+      return code;
+    }
+
+    function updateCode() {
+      currentCode = generateCode();
+      document.getElementById('currentCode').innerText = currentCode;
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const form = document.getElementById('attendanceForm');
       const nameInput = document.getElementById('name');
@@ -133,6 +148,10 @@
 
       const targetLocation = { lat: 27.1862, lon: 78.0031 }; // Change to your target latitude and longitude
       const radius = 100; // Distance in meters
+
+      // Generate the initial code and update every minute
+      updateCode();
+      setInterval(updateCode, 60000); // Update code every minute
 
       function getDistance(lat1, lon1, lat2, lon2) {
         const R = 6371e3; // Radius of Earth in meters
@@ -189,64 +208,50 @@
         const attendanceCode = codeInput.value;
         const today = new Date().toLocaleDateString();
 
+        // Validate the entered code against the current code
+        if (attendanceCode !== currentCode) {
+          alert('Invalid attendance code. Please check the code and try again.');
+          return;
+        }
+
         const isInArea = await checkLocation();
 
         if (isInArea) {
           const isDuplicate = await checkDuplicate(name, today);
-          
-          if (isDuplicate) {
-            alert('Attendance for this name has already been recorded today.');
+          if (!isDuplicate) {
+            await addDoc(collection(db, "attendance"), {
+              name: name,
+              attendanceCode: attendanceCode,
+              timestamp: serverTimestamp(),
+              date: today
+            });
+            alert('Attendance marked successfully!');
+            displayAttendance();
           } else {
-            try {
-              await addDoc(collection(db, "attendance"), {
-                name: name,
-                attendanceCode: attendanceCode,
-                date: today,
-                timestamp: serverTimestamp()
-              });
-              alert('Attendance recorded!');
-              form.reset();
-              displayAttendance();
-            } catch (error) {
-              console.error("Error adding document: ", error);
-            }
+            alert('You have already marked attendance for today.');
           }
         } else {
-          alert('You are not within the required area.');
+          alert('You are not in the designated attendance area.');
         }
+
+        // Clear input fields
+        nameInput.value = '';
+        codeInput.value = '';
+        submitButton.disabled = true; // Disable button again
       });
 
-      async function displayAttendance() {
-        attendanceList.innerHTML = ''; // Clear the current attendance list
-        const querySnapshot = await getDocs(collection(db, "attendance"));
+      function displayAttendance() {
+        attendanceList.innerHTML = ''; // Clear existing entries
 
-        const today = new Date(); // Get today's date object
-        const todayStringMMDD = today.toLocaleDateString('en-US'); // mm/dd/yyyy format
-
-        const attendanceEntries = []; // Array to hold attendance entries
-
-        // Iterate through the attendance documents
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const attendanceDate = new Date(data.timestamp.toDate()); // Convert Firestore Timestamp to Date
-
-          // Only include entries from today
-          if (attendanceDate.toLocaleDateString() === today.toLocaleDateString()) {
-            // Add attendance entry to the array
-            attendanceEntries.push({
-              name: data.name,
-              attendanceCode: data.attendanceCode,
-              timestamp: attendanceDate.toLocaleTimeString(), // Format timestamp
-            });
-          }
-        });
-
-        // Populate the attendance table with the entries
-        attendanceEntries.forEach(entry => {
-          const row = attendanceList.insertRow();
-          row.insertCell(0).innerText = entry.name;
-          row.insertCell(1).innerText = entry.attendanceCode;
-          row.insertCell(2).innerText = entry.timestamp;
+        // Fetch attendance records from Firestore
+        getDocs(collection(db, "attendance")).then((snapshot) => {
+          snapshot.forEach((doc) => {
+            const entry = doc.data();
+            const row = attendanceList.insertRow();
+            row.insertCell(0).innerText = entry.name;
+            row.insertCell(1).innerText = entry.attendanceCode;
+            row.insertCell(2).innerText = new Date(entry.timestamp.seconds * 1000).toLocaleString(); // Format timestamp
+          });
         });
       }
 
