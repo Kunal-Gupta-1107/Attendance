@@ -219,13 +219,19 @@
       async function displayAttendance() {
         attendanceList.innerHTML = '';
         const querySnapshot = await getDocs(collection(db, "attendance"));
+
+        const today = new Date().toLocaleDateString(); // YE AAJ KI DATE LEGA (JYADA GOR SE MT PD)
         
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          const row = attendanceList.insertRow();
-          row.insertCell(0).textContent = data.name;
-          row.insertCell(1).textContent = data.code;
-          row.insertCell(2).textContent = data.timestamp.toDate().toLocaleString();
+          
+          if (data.date === today) {
+            const row = attendanceList.insertRow();
+            row.insertCell(0).textContent = data.name;
+            row.insertCell(1).textContent = data.code;
+            //row.insertCell(2).textContent = data.timestamp.toDate().toLocaleString(); // wITH TIME ( TIME DIKHEGA BACCHE)
+            row.insertCell(2).textContent = data.timestamp.toDate().toLocaleDateString();
+          }
         });
       }
 
