@@ -180,14 +180,19 @@
             function normalizeDate(dateString) {
                 const dateParts = dateString.split(/[\/\-]/);
                 if (dateParts.length === 3) {
-                    if (dateParts[2].length === 4) {
-                        // Check if format is mm/dd/yyyy or dd/mm/yyyy
-                        const isUSFormat = parseInt(dateParts[0]) <= 12;
-                        const [day, month, year] = isUSFormat
-                            ? [dateParts[1], dateParts[0], dateParts[2]]
-                            : [dateParts[0], dateParts[1], dateParts[2]];
-                        return `${year}-${month}-${day}`;
+                    const day = parseInt(dateParts[0], 10);
+                    const month = parseInt(dateParts[1], 10);
+                    const year = parseInt(dateParts[2], 10);
+                    if (year < 1000) {
+                        // Invalid year
+                        return null;
                     }
+                    if (month > 12) {
+                        // Assuming dd/mm/yyyy format
+                        return `${year}-${('0' + month).slice(-2)}-${('0' + day).slice(-2)}`;
+                    }
+                    // Assuming mm/dd/yyyy format
+                    return `${year}-${('0' + month).slice(-2)}-${('0' + day).slice(-2)}`;
                 }
                 return null; // Invalid format
             }
