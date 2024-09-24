@@ -161,13 +161,175 @@
                                 const distance = getDistance(latitude, longitude, targetLocation.lat, targetLocation.lon);
                                 resolve(distance <= radius);
                             },
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Form</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="./manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                }).catch(function(error) {
+                    console.error('Service Worker registration failed:', error);
+                });
+            });
+        }
+    </script>
+    <style>
+        /* Styles */
+        #locationModal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        #modalContent {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        #closeModal {
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        #installButton {
+            display: none;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Attendance Form</h1>
+    <form id="attendanceForm">
+        <input type="text" id="name" placeholder="Enter your name" required>
+        <input type="text" id="attendanceCode" placeholder="Enter Attendance Code" required>
+        <button type="submit" id="submitButton" disabled>Submit</button>
+    </form>
+
+    <table id="attendanceList">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Attendance Code</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Attendance records will be populated here -->
+        </tbody>
+    </table>
+
+    <button id="installButton">Install App</button>
+
+    <!-- Modal for location request -->
+    <div id="locationModal">
+        <div id="modalContent">
+            <h2>Location Access Required</h2>
+            <p>To mark your attendance, we need access to your location. Please allow location access in your browser.</p>
+            <button id="closeModal">Okay</button>
+        </div>
+    </div>
+
+    <script src="scripts.js" type="module"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFJrziRByYb0EwC2sYfP_cLtiQJlS02cY",
+            authDomain: "attendance-38541.firebaseapp.com",
+            projectId: "attendance-38541",
+            storageBucket: "attendance-38541.appspot.com",
+            messagingSenderId: "439358946279",
+            appId: "1:439358946279:web:fe466a68db5e8ad77f1b42"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const HARD_CODED_CODE = "ABC123";
+        let currentCode = HARD_CODED_CODE;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('attendanceForm');
+            const nameInput = document.getElementById('name');
+            const codeInput = document.getElementById('attendanceCode');
+            const submitButton = document.getElementById('submitButton');
+            const attendanceList = document.getElementById('attendanceList').getElementsByTagName('tbody')[0];
+            const installButton = document.getElementById('installButton');
+            const locationModal = document.getElementById('locationModal');
+            const closeModal = document.getElementById('closeModal');
+            let deferredPrompt;
+
+            const targetLocation = { lat: 27.1862, lon: 78.0031 };
+            const radius = 100;
+
+            function getDistance(lat1, lon1, lat2, lon2) {
+                const R = 6371e3;
+                const φ1 = lat1 * Math.PI / 180;
+                const φ2 = lat2 * Math.PI / 180;
+                const Δφ = (lat2 - lat1) * Math.PI / 180;
+                const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+                const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                          Math.cos(φ1) * Math.cos(φ2) *
+                          Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c;
+            }
+
+            function checkLocation() {
+                return new Promise((resolve, reject) => {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                const { latitude, longitude } = position.coords;
+                                const distance = getDistance(latitude, longitude, targetLocation.lat, targetLocation.lon);
+                                resolve(distance <= radius);
+                            },
                             (error) => {
-                                locationModal.style.display = 'flex'; // Show modal if there's an error
+                                locationModal.style.display = 'flex';
                                 reject(false);
                             }
                         );
                     } else {
-                        locationModal.style.display = 'flex'; // Show modal if geolocation is not supported
+                        locationModal.style.display = 'flex';
                         reject(false);
                     }
                 });
@@ -176,7 +338,7 @@
             async function checkDuplicate(name, date) {
                 const attendanceQuery = query(collection(db, "attendance"), where("name", "==", name), where("date", "==", date));
                 const querySnapshot = await getDocs(attendanceQuery);
-                return !querySnapshot.empty; // If not empty, duplicate exists
+                return !querySnapshot.empty;
             }
 
             async function addAttendance(name, attendanceCode) {
@@ -189,16 +351,24 @@
             }
 
             async function displayAttendance() {
-                attendanceList.innerHTML = ''; // Clear previous entries
+                attendanceList.innerHTML = '';
                 const querySnapshot = await getDocs(collection(db, "attendance"));
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     const row = attendanceList.insertRow();
                     row.insertCell(0).textContent = data.name;
                     row.insertCell(1).textContent = "Hidden";
-                    row.insertCell(2).textContent = new Date(data.timestamp.toDate()).toLocaleString(); // Convert Firestore timestamp to date
+                    row.insertCell(2).textContent = new Date(data.timestamp.toDate()).toLocaleString();
                 });
             }
+
+            form.addEventListener('input', () => {
+                if (nameInput.value && codeInput.value) {
+                    submitButton.disabled = false;
+                } else {
+                    submitButton.disabled = true;
+                }
+            });
 
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -206,56 +376,42 @@
                 const attendanceCode = codeInput.value;
                 const today = new Date().toLocaleDateString();
 
-                // Validate the entered code against the hardcoded code
                 if (attendanceCode !== currentCode) {
-                    alert('Invalid attendance code.');
+                    alert('Invalid attendance code. Please try again.');
                     return;
                 }
 
-                // Check location
                 const isInLocation = await checkLocation();
                 if (!isInLocation) {
-                    alert('You must be within the designated location to mark attendance.');
+                    alert('You are outside the required location.');
                     return;
                 }
 
-                // Check for duplicates
                 const isDuplicate = await checkDuplicate(name, today);
                 if (isDuplicate) {
-                    alert('You have already marked attendance today.');
+                    alert('Attendance already marked today.');
                     return;
                 }
 
-                // Add attendance to Firestore
-                await addDoc(collection(db, "attendance"), {
-                    name: name,
-                    attendanceCode: attendanceCode,
-                    timestamp: serverTimestamp(),
-                    date: today // Store today's date
-                });
+                await addAttendance(name, attendanceCode);
 
-                // Show message for marked attendance
                 alert('Attendance marked successfully!');
 
-                // Clear form
                 nameInput.value = '';
                 codeInput.value = '';
                 submitButton.disabled = true;
 
-                // Refresh attendance records
                 displayAttendance();
             });
 
-            // Event listeners for modal close
             closeModal.addEventListener('click', () => {
                 locationModal.style.display = 'none';
             });
 
-            // Install PWA
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
-                deferredPrompt = e; // Stash the event so it can be triggered later
-                installButton.style.display = 'block'; // Show the install button
+                deferredPrompt = e;
+                installButton.style.display = 'block';
             });
 
             installButton.addEventListener('click', async () => {
@@ -263,11 +419,11 @@
                     deferredPrompt.prompt(); // Show the install prompt
                     const { outcome } = await deferredPrompt.userChoice;
                     console.log(`User response to the install prompt: ${outcome}`);
-                    deferredPrompt = null; // Clear the prompt
+                    deferredPrompt = null; // Clear the prompt variable
                 }
             });
 
-            // Initial display of attendance records
+            // Initial display of attendance records when the page loads
             displayAttendance();
         });
     </script>
