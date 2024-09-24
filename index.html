@@ -224,7 +224,7 @@
                     if (attendanceDate) {
                         const row = attendanceList.insertRow();
                         row.insertCell(0).textContent = data.name; // Name of the student
-                        row.insertCell(1).textContent = data.attendanceCode; // Attendance code
+                        row.insertCell(1).textContent = "Hidden" // Attendance code
                         row.insertCell(2).textContent = attendanceDate.toLocaleDateString(); // Shows the date only
                     }
                 });
