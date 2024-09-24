@@ -221,25 +221,27 @@ async function displayAttendance() {
   const querySnapshot = await getDocs(collection(db, "attendance"));
 
   const today = new Date(); // Get today's date object
-  const todayString = today.toLocaleDateString(); // Get today's date in mm/dd/yyyy format
+  const todayString = today.toLocaleDateString(); // Get today's date in the local format
 
   // Iterate through the attendance documents
   querySnapshot.forEach((doc) => {
     const data = doc.data();
 
-    // Convert the stored date to a Date object
-    const attendanceDate = new Date(data.date);
-    const attendanceDateString = attendanceDate.toLocaleDateString(); // Normalize date format
+    // Assume the stored date is in a format that can be parsed correctly
+    const attendanceDate = new Date(data.date); // Create a Date object from the stored date
+    const attendanceDateString = attendanceDate.toLocaleDateString(); // Normalize the attendance date format
 
     // Check if the normalized attendance date is today
     if (attendanceDateString === todayString) {
+      // Create a table row
       const row = attendanceList.insertRow();
       row.insertCell(0).textContent = data.name; // Name of the student
-      row.insertCell(1).textContent = data.code; // Attendance code (if you have it)
-      row.insertCell(2).textContent = attendanceDate.toLocaleDateString(); // Shows the date only
+      row.insertCell(1).textContent = data.code || "N/A"; // Attendance code, default to "N/A" if not available
+      row.insertCell(2).textContent = attendanceDate.toLocaleDateString(); // Display the date only
     }
   });
 }
+
 
 
 
