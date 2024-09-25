@@ -73,6 +73,7 @@
 </head>
 <body>
     <h1>Attendance Form</h1>
+    <h3 id="currentDate"></h3>
     <form id="attendanceForm">
         <input type="text" id="name" placeholder="Enter your name" required>
         <input type="text" id="attendanceCode" placeholder="Enter Attendance Code" required>
@@ -93,6 +94,11 @@
     </table>
 
     <button id="installButton">Install App</button> <!-- Install Button -->
+<!--     date ke script hai SIGMA -->
+    <script>
+        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB', options);
+    </script>
 
     <!-- Modal for location request -->
     <div id="locationModal">
