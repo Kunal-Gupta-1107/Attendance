@@ -73,12 +73,12 @@
 </head>
 <body>
     <h1>Attendance Form</h1>
-    <h3 id="currentDate"></h3>
     <form id="attendanceForm">
         <input type="text" id="name" placeholder="Enter your name" required>
         <input type="text" id="attendanceCode" placeholder="Enter Attendance Code" required>
         <button type="submit" id="submitButton" disabled>Submit</button>
     </form>
+    <h3 id="currentDate"></h3>
 
     <table id="attendanceList">
         <thead>
@@ -94,6 +94,7 @@
     </table>
 
     <button id="installButton">Install App</button> <!-- Install Button -->
+    
 <!--     date ke script hai SIGMA -->
     <script>
         const options = { day: 'numeric', month: 'long', year: 'numeric' };
