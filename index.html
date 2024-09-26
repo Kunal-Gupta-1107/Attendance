@@ -185,22 +185,29 @@
                     }
                 });
             }
+            // ye check karega lekin ese jab call karenge jab new attendance add karenge okk  
+           async function checkDuplicate(name) {
+              const today = new Date(); // Get today's date object
+              const todayFormatted = today.toISOString().split('T')[0]; // Consistently store as yyyy-mm-dd
 
-            async function checkDuplicate(name, date) {
-                const attendanceQuery = query(collection(db, "attendance"), where("name", "==", name), where("date", "==", date));
-                const querySnapshot = await getDocs(attendanceQuery);
-                return !querySnapshot.empty;
-            }
+    // Query for matching name and today's date
+             const attendanceQuery = query(collection(db, "attendance"), where("name", "==", name), where("date", "==", todayFormatted));
+             const querySnapshot = await getDocs(attendanceQuery);
 
-            async function addAttendance(name, attendanceCode) {
-                await addDoc(collection(db, "attendance"), {
-                    name: name,
-                    attendanceCode: attendanceCode,
-                    timestamp: serverTimestamp(),
-                    date: new Date().toLocaleDateString() // Store date as a string
-                });
-            }
+    // If there's any result, that means the attendance has already been marked today.
+              return !querySnapshot.empty;
+          }
 
+          async function addAttendance(name, attendanceCode) {
+              const currentDateISO = new Date().toISOString().split('T')[0]; // Save the date in ISO format
+          
+              await addDoc(collection(db, "attendance"), {
+                  name: name,
+                  attendanceCode: attendanceCode,
+                  timestamp: serverTimestamp(),
+                  date: currentDateISO  // Store in consistent format yyyy-mm-dd
+              });
+          }
             async function displayAttendance() {
                 attendanceList.innerHTML = ''; // Clear the current attendance list
                 const querySnapshot = await getDocs(collection(db, "attendance"));
@@ -259,7 +266,8 @@
                 const isWithinLocation = await checkLocation();
 
                 if (isWithinLocation) {
-                    const currentDate = new Date().toLocaleDateString();
+                    // const currentDate = new Date().toLocaleDateString();
+                    const currentDate = new Date().toISOString().split('T')[0]; // Gets yyyy-mm-dd format
                     const isDuplicate = await checkDuplicate(name, currentDate);
 
                     if (!isDuplicate && attendanceCode === currentCode) {
