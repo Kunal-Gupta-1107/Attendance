@@ -208,47 +208,58 @@
                   date: currentDateISO  // Store in consistent format yyyy-mm-dd
               });
           }
-            async function displayAttendance() {
-                attendanceList.innerHTML = ''; // Clear the current attendance list
-                const querySnapshot = await getDocs(collection(db, "attendance"));
 
-                const today = new Date(); // Get today's date object
-                const todayStringMMDD = today.toLocaleDateString('en-US'); // mm/dd/yyyy format
-                const todayStringDDMM = today.toLocaleDateString('en-GB'); // dd/mm/yyyy format
 
-                // Iterate through the attendance documents
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    let attendanceDate;
-
-                    // Check if the date is in mm/dd/yyyy or dd/mm/yyyy format
-                    if (data.date.includes('/')) {
-                        const dateParts = data.date.split('/');
-
-                        if (dateParts.length === 3) {
-                            // Try mm/dd/yyyy format
-                            const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`); // YYYY-MM-DD format
-                            if (mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
-                                attendanceDate = mmddDate;
-                            }
-
-                            // Try dd/mm/yyyy format if mm/dd/yyyy didn't match today
-                            const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`); // YYYY-MM-DD format
-                            if (!attendanceDate && ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
-                                attendanceDate = ddmmDate;
+            
+                async function displayAttendance() {
+                    attendanceList.innerHTML = ''; // Clear the current attendance list
+                    const querySnapshot = await getDocs(collection(db, "attendance"));
+                
+                    // Create an array to hold attendance records for sorting
+                    const records = [];
+                
+                    // Iterate through the attendance documents
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        let attendanceDate;
+                
+                        // Check if the date is in mm/dd/yyyy or dd/mm/yyyy format
+                        if (data.date.includes('/')) {
+                            const dateParts = data.date.split('/');
+                
+                            if (dateParts.length === 3) {
+                                // Try mm/dd/yyyy format
+                                const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`); // YYYY-MM-DD format
+                                if (mmddDate.toLocaleDateString() === new Date().toLocaleDateString()) {
+                                    attendanceDate = mmddDate;
+                                }
+                
+                                // Try dd/mm/yyyy format if mm/dd/yyyy didn't match today
+                                const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`); // YYYY-MM-DD format
+                                if (!attendanceDate && ddmmDate.toLocaleDateString() === new Date().toLocaleDateString()) {
+                                    attendanceDate = ddmmDate;
+                                }
                             }
                         }
-                    }
-
-                    // If attendanceDate is valid and matches today's date
-                    if (attendanceDate) {
+                
+                        // If attendanceDate is valid and matches today's date
+                        if (attendanceDate) {
+                            records.push({ name: data.name, attendanceCode: "Hidden", date: attendanceDate }); // Push record to array
+                        }
+                    });
+                
+                    // Sort records by attendance date in ascending order
+                    records.sort((a, b) => a.date - b.date);
+                
+                    // Populate the table with sorted records
+                    records.forEach(record => {
                         const row = attendanceList.insertRow();
-                        row.insertCell(0).textContent = data.name; // Name of the student
-                        row.insertCell(1).textContent = "Hidden" // Attendance code
-                        row.insertCell(2).textContent = attendanceDate.toLocaleDateString(); // Shows the date only
-                    }
-                });
-            }
+                        row.insertCell(0).textContent = record.name; // Name of the student
+                        row.insertCell(1).textContent = record.attendanceCode; // Attendance code
+                        row.insertCell(2).textContent = record.date.toLocaleDateString(); // Shows the date only
+                    });
+                }
+
 
             nameInput.addEventListener('input', () => {
                 submitButton.disabled = !(nameInput.value && codeInput.value);
