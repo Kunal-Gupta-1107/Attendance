@@ -210,7 +210,6 @@
           }
 
 
-            
                 async function displayAttendance() {
                     attendanceList.innerHTML = ''; // Clear the current attendance list
                     const querySnapshot = await getDocs(collection(db, "attendance"));
@@ -244,12 +243,18 @@
                 
                         // If attendanceDate is valid and matches today's date
                         if (attendanceDate) {
-                            records.push({ name: data.name, attendanceCode: "Hidden", date: attendanceDate }); // Push record to array
+                            // Store the attendance entry with a timestamp
+                            records.push({ 
+                                name: data.name, 
+                                attendanceCode: "Hidden", 
+                                date: attendanceDate,
+                                timestamp: doc.data().timestamp // Assuming you have a timestamp field in your Firestore document
+                            });
                         }
                     });
                 
-                    // Sort records by attendance date in ascending order
-                    records.sort((a, b) => a.date - b.date);
+                    // Sort records by timestamp in ascending order
+                    records.sort((a, b) => a.timestamp - b.timestamp);
                 
                     // Populate the table with sorted records
                     records.forEach(record => {
@@ -259,6 +264,7 @@
                         row.insertCell(2).textContent = record.date.toLocaleDateString(); // Shows the date only
                     });
                 }
+
 
 
             nameInput.addEventListener('input', () => {
