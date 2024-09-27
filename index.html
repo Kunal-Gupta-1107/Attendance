@@ -199,15 +199,18 @@
           }
 
           async function addAttendance(name, attendanceCode) {
-              const currentDateISO = new Date().toISOString().split('T')[0]; // Save the date in ISO format
-          
-              await addDoc(collection(db, "attendance"), {
-                  name: name,
-                  attendanceCode: attendanceCode,
-                  timestamp: serverTimestamp(),
-                  date: currentDateISO  // Store in consistent format yyyy-mm-dd
-              });
-          }
+
+const currentDateISO = new Date().tolSOString().split('T')[0]; the date in ISO format // Save
+
+await addDoc(collection(db,
+
+"attendance"), {
+
+name: name, attendanceCode: attendanceCode, timestamp:
+
+serverTimestamp(), date: currentDateISO // Store in consistent format yyyy-mm-dd });
+
+}
 
 
 
