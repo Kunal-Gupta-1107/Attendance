@@ -210,60 +210,70 @@
           }
 
 
-                async function displayAttendance() {
-                    attendanceList.innerHTML = ''; // Clear the current attendance list
-                    const querySnapshot = await getDocs(collection(db, "attendance"));
-                
-                    // Create an array to hold attendance records for sorting
-                    const records = [];
-                
-                    // Iterate through the attendance documents
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        let attendanceDate;
-                
-                        // Check if the date is in mm/dd/yyyy or dd/mm/yyyy format
-                        if (data.date.includes('/')) {
-                            const dateParts = data.date.split('/');
-                
-                            if (dateParts.length === 3) {
-                                // Try mm/dd/yyyy format
-                                const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`); // YYYY-MM-DD format
-                                if (mmddDate.toLocaleDateString() === new Date().toLocaleDateString()) {
-                                    attendanceDate = mmddDate;
-                                }
-                
-                                // Try dd/mm/yyyy format if mm/dd/yyyy didn't match today
-                                const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`); // YYYY-MM-DD format
-                                if (!attendanceDate && ddmmDate.toLocaleDateString() === new Date().toLocaleDateString()) {
-                                    attendanceDate = ddmmDate;
-                                }
-                            }
-                        }
-                
-                        // If attendanceDate is valid and matches today's date
-                        if (attendanceDate) {
-                            // Store the attendance entry with a timestamp
-                            records.push({ 
-                                name: data.name, 
-                                attendanceCode: "Hidden", 
-                                date: attendanceDate,
-                                timestamp: doc.data().timestamp // Assuming you have a timestamp field in your Firestore document
-                            });
-                        }
-                    });
-                
-                    // Sort records by timestamp in ascending order
-                    records.sort((a, b) => a.timestamp - b.timestamp);
-                
-                    // Populate the table with sorted records
-                    records.forEach(record => {
-                        const row = attendanceList.insertRow();
-                        row.insertCell(0).textContent = record.name; // Name of the student
-                        row.insertCell(1).textContent = "Hidden"; // Attendance code
-                        row.insertCell(2).textContent = record.date.toLocaleDateString(); // Shows the date only
-                    });
+
+
+
+            
+async function displayAttendance() {
+    attendanceList.innerHTML = ''; // Clear the current attendance list
+    const querySnapshot = await getDocs(collection(db, "attendance"));
+
+    // Create an array to hold attendance records for sorting
+    const records = [];
+
+    // Iterate through the attendance documents
+    querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        let attendanceDate;
+
+        // Check if the date is in mm/dd/yyyy or dd/mm/yyyy format
+        if (data.date.includes('/')) {
+            const dateParts = data.date.split('/');
+
+            if (dateParts.length === 3) {
+                // Try mm/dd/yyyy format
+                const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`); // YYYY-MM-DD format
+                if (mmddDate.toLocaleDateString() === new Date().toLocaleDateString()) {
+                    attendanceDate = mmddDate;
                 }
+
+                // Try dd/mm/yyyy format if mm/dd/yyyy didn't match today
+                const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`); // YYYY-MM-DD format
+                if (!attendanceDate && ddmmDate.toLocaleDateString() === new Date().toLocaleDateString()) {
+                    attendanceDate = ddmmDate;
+                }
+            }
+        }
+
+        // If attendanceDate is valid and matches today's date
+        if (attendanceDate) {
+            // Store the attendance entry with a timestamp
+            records.push({ 
+                name: data.name, 
+                attendanceCode: "Hidden", 
+                date: attendanceDate,
+                timestamp: data.timestamp // Changed to access timestamp directly
+            });
+        }
+    });
+
+    // Sort records by timestamp in ascending order
+    records.sort((a, b) => a.timestamp - b.timestamp);
+
+    // Populate the table with sorted records
+    records.forEach(record => {
+        const row = attendanceList.insertRow();
+        row.insertCell(0).textContent = record.name; // Name of the student
+        row.insertCell(1).textContent = record.attendanceCode; // Attendance code, changed from "Hidden"
+        row.insertCell(2).textContent = record.date.toLocaleDateString(); // Shows the date only
+    });
+
+    // Check if any records were added
+    if (records.length === 0) {
+        const row = attendanceList.insertRow();
+        row.insertCell(0).textContent = "No attendance records found."; // Provide feedback if no records
+    }
+}
 
 
 
