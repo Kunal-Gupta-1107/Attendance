@@ -260,7 +260,7 @@
                     records.forEach(record => {
                         const row = attendanceList.insertRow();
                         row.insertCell(0).textContent = record.name; // Name of the student
-                        row.insertCell(1).textContent = record.attendanceCode; // Attendance code
+                        row.insertCell(1).textContent = "Hidden"; // Attendance code
                         row.insertCell(2).textContent = record.date.toLocaleDateString(); // Shows the date only
                     });
                 }
