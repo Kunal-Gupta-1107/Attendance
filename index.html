@@ -120,6 +120,22 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+        import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+            async function validateAttendanceCode(inputCode) {
+                // Reference to the attendance code document
+                const attendanceCodeDoc = await getDoc(doc(db, "attendanceCodes", "currentCode")); // Change to your document ID
+                
+                // Check if the document exists
+                if (attendanceCodeDoc.exists()) {
+                    const storedCode = attendanceCodeDoc.data().code;
+                    return inputCode === storedCode; // Check if the codes match
+                } else {
+                    console.error("No such document!");
+                    return false;
+                }
+            }
+
 
         const firebaseConfig = {
             apiKey: "AIzaSyBFJrziRByYb0EwC2sYfP_cLtiQJlS02cY",
@@ -273,38 +289,36 @@ async function displayAttendance() {
             });
 
             form.addEventListener('submit', async (event) => {
-                event.preventDefault();
-
-                const name = nameInput.value;
-                const attendanceCode = codeInput.value;
-                const isWithinLocation = await checkLocation();
-
-                if (isWithinLocation) {
-                    // const currentDate = new Date().toLocaleDateString();
-                    const currentDate = new Date().toISOString().split('T')[0]; // Gets yyyy-mm-dd format
-                    const isDuplicate = await checkDuplicate(name, currentDate);
-
-                    if (!isDuplicate && attendanceCode === currentCode) {
-                        await addAttendance(name, attendanceCode);
-                        alert('Attendance marked successfully!');
-                        nameInput.value = '';
-                        codeInput.value = '';
-                        submitButton.disabled = true;
-                        displayAttendance();
+                    event.preventDefault();
+                
+                    const name = nameInput.value;
+                    const attendanceCode = codeInput.value;
+                    const isWithinLocation = await checkLocation();
+                
+                    if (isWithinLocation) {
+                        const isValidCode = await validateAttendanceCode(attendanceCode);
+                
+                        if (isValidCode) {
+                            const isDuplicate = await checkDuplicate(name);
+                
+                            if (!isDuplicate) {
+                                await addAttendance(name, attendanceCode);
+                                alert('Attendance marked successfully!');
+                                nameInput.value = '';
+                                codeInput.value = '';
+                                submitButton.disabled = true;
+                                displayAttendance();
+                            } else {
+                                alert('Attendance already marked for today.');
+                            }
+                        } else {
+                            alert('Incorrect attendance code.');
+                        }
                     } else {
-                        alert(isDuplicate ? 'Attendance already marked for today.' : 'Incorrect attendance code.');
+                        alert('Location access denied or outside the required location.');
                     }
-                } else {
-                    alert('Location access denied or outside the required location.');
-                }
-            });
+                });
 
-            closeModal.addEventListener('click', () => {
-                locationModal.style.display = 'none';
-            });
-
-            displayAttendance();
-        });
     </script>
 </body>
 </html>
