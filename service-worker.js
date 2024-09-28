@@ -5,30 +5,46 @@ const urlsToCache = [
   '/styles.css',
   '/scripts.js',
   '/icon.png',
-  '/icon-large.png'
+  '/icon-large.png',
+  '/offline.html' // Add an offline fallback page
 ];
 
+// Install event: Cache important resources
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('Opened cache');
+      return cache.addAll(urlsToCache);
+    })
+  );
+  self.skipWaiting(); // Activate the new service worker immediately
+});
+
+// Fetch event: Serve cached content or fallback to network
+self.addEventListener('fetch', (event) => {
+  // Only cache GET requests to avoid caching sensitive data sent via POST/PUT/DELETE
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      // Return cached response if available, else fetch from network
+      return response || fetch(event.request).then((networkResponse) => {
+        // Optionally, you can cache the new response if necessary:
+        return caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, networkResponse.clone());
+          return networkResponse;
+        });
+      });
+    }).catch(() => {
+      // If both cache and network fail, show an offline fallback
+      return caches.match('/offline.html');
+    })
   );
 });
 
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
-      })
-  );
-});
+// Activate event: Clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -42,4 +58,5 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  self.clients.claim(); // Immediately take control of open pages
 });
