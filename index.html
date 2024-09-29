@@ -262,18 +262,19 @@
             }
 
             nameInput.addEventListener('input', () => {
-                submitButton.disabled = !(nameInput.value && codeInput.value);
+                submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
+
             });
 
             codeInput.addEventListener('input', () => {
-                submitButton.disabled = !(nameInput.value && codeInput.value);
+                submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());  
             });
 
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
 
-                const name = nameInput.value;
-                const attendanceCode = codeInput.value;
+                const name = nameInput.value.trim();
+                const attendanceCode = codeInput.value.trim();
                 const isWithinLocation = await checkLocation();
                 const currentCode = await retrieveAttendanceCode();
 
