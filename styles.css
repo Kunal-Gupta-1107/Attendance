@@ -11,7 +11,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: url('wall.png'); /* Use your image as background */
+    background-image: url('wall.jpg'); /* Use your image as background */
     background-size: cover;
     background-position: center;
 }
