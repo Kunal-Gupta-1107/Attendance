@@ -222,6 +222,7 @@
             async function displayAttendance() {
                 attendanceList.innerHTML = ''; // Clear the current attendance list
                 const querySnapshot = await getDocs(collection(db, "attendance"));
+                 const attendanceRecords = [];
 
                 const today = new Date(); // Get today's date object
                 const todayStringMMDD = today.toLocaleDateString('en-US'); // mm/dd/yyyy format
@@ -260,12 +261,13 @@
                         attendanceRecords.push({
                             name: data.name,
                             code: hiddenCode,
-                            date: attendanceDate
+                            date: attendanceDate,
+                            timestamp: data.timestamp // Access timestamp directly
                         });
                     }
                 });
                 // ATTENDANCE KO SORT KARANA BHI JURIRU HAI  (KISNE PAHLE OR KISNE BAAD ME.)
-                attendanceRecords.sort((a, b) => a.date - b.date);
+                attendanceRecords.sort((a, b) => a.timestamp - b.timestamp);
 
                     // If attendanceDate is valid and matches today's date
                 if (attendanceDate) {
@@ -274,7 +276,13 @@
                     row.insertCell(1).textContent = record.code; // Attendance code
                     row.insertCell(2).textContent = record.date.toLocaleDateString(); // Shows the date only
                 }
-            }
+                if (records.length === 0) {
+                    const row = attendanceList.insertRow();
+                    row.insertCell(0).textContent = "No Record For Today";// Provide feedback if no records
+                    row.insertCell(1).textContent = "No Code For Attendance"; // Attendance code
+                    row.insertCell(2).textContent = record.date.toLocaleDateString(); // Shows the date only
+                }
+            } // End of ();
 
             nameInput.addEventListener('input', () => {
                 submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
