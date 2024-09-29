@@ -165,29 +165,6 @@
                 return R * c; // Distance in meters
             }
 
-
-            import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-            
-            // Function to retrieve the attendance code from Firestore
-            const retrieveAttendanceCode = async () => {
-                // Reference the specific document in Firestore
-                const codeDoc = doc(db, 'attendanceCode', 'currentCode');
-                try {
-                    const docSnapshot = await getDoc(codeDoc);
-                    if (docSnapshot.exists()) {
-                        const validCode = docSnapshot.data().code;  // Get the stored code
-                        console.log("Attendance Code:", validCode);  // Log the retrieved code
-                        return validCode;  // Return the code
-                    } else {
-                        console.log("No such document found in Firestore.");
-                        return null;
-                    }
-                } catch (error) {
-                    console.error("Error retrieving attendance code:", error);
-                }
-            };
-
-
             function checkLocation() {
                 return new Promise((resolve, reject) => {
                     if (navigator.geolocation) {
@@ -265,7 +242,7 @@
                     }
                 });
             }
-            
+
             nameInput.addEventListener('input', () => {
                 submitButton.disabled = !(nameInput.value && codeInput.value);
             });
@@ -274,28 +251,17 @@
                 submitButton.disabled = !(nameInput.value && codeInput.value);
             });
 
-            // nameInput.addEventListener('input', () => {
-            //     submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
-            // });
-            
-            // codeInput.addEventListener('input', () => {
-            //     submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
-            // });
-            
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
-            
+
                 const name = nameInput.value;
                 const attendanceCode = codeInput.value;
                 const isWithinLocation = await checkLocation();
-            
+
                 if (isWithinLocation) {
                     const currentDate = new Date().toLocaleDateString();
                     const isDuplicate = await checkDuplicate(name, currentDate);
-            
-                    // Retrieve currentCode from Firestore using the modular syntax
-                    const currentCode = await retrieveAttendanceCode();
-            
+
                     if (!isDuplicate && attendanceCode === currentCode) {
                         await addAttendance(name, attendanceCode);
                         alert('Attendance marked successfully!');
@@ -309,6 +275,10 @@
                 } else {
                     alert('Location access denied or outside the required location.');
                 }
+            });
+
+            closeModal.addEventListener('click', () => {
+                locationModal.style.display = 'none';
             });
 
             displayAttendance();
