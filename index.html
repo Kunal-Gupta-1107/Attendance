@@ -256,14 +256,24 @@
                         hiddenCode = "No Code For Today";
                     }
 
-                    // If attendanceDate is valid and matches today's date
                     if (attendanceDate) {
-                        const row = attendanceList.insertRow();
-                        row.insertCell(0).textContent = data.name; // Name of the student
-                        row.insertCell(1).textContent = hiddenCode // Attendance code
-                        row.insertCell(2).textContent = attendanceDate.toLocaleDateString(); // Shows the date only
+                        attendanceRecords.push({
+                            name: data.name,
+                            code: hiddenCode,
+                            date: attendanceDate
+                        });
                     }
                 });
+                // ATTENDANCE KO SORT KARANA BHI JURIRU HAI  (KISNE PAHLE OR KISNE BAAD ME.)
+                attendanceRecords.sort((a, b) => a.date - b.date);
+
+                    // If attendanceDate is valid and matches today's date
+                if (attendanceDate) {
+                    const row = attendanceList.insertRow();
+                    row.insertCell(0).textContent = record.name; // Name of the student
+                    row.insertCell(1).textContent = record.code; // Attendance code
+                    row.insertCell(2).textContent = record.date.toLocaleDateString(); // Shows the date only
+                }
             }
 
             nameInput.addEventListener('input', () => {
