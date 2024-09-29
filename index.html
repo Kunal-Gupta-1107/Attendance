@@ -133,12 +133,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-
-            
-        // Hardcoded attendance code
-        const HARD_CODED_CODE = "SIGMA"; // Change this code as needed
-        let currentCode = HARD_CODED_CODE;
-
        
         import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
         // Function to retrieve the attendance code from Firestore
@@ -149,7 +143,7 @@
                 const docSnapshot = await getDoc(codeDoc);
                 if (docSnapshot.exists()) {
                     const validCode = docSnapshot.data().code;  // Get the stored code
-                    console.log("Attendance Code:", validCode);  // Log the retrieved code
+                    console.log("Attendance Code: Beta Code to Hidden hai");  // Log the retrieved code
                     return validCode;  // Return the code
                 } else {
                     console.log("No such document found in Firestore.");
