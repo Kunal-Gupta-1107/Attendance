@@ -166,24 +166,26 @@
             }
 
 
-            // Function to retrieve the 03150405 from Firestore
-                const retrieveAttendanceCode = () => {
-                  // Reference the specific document in Firestore
-                  firebase.firestore().collection('attendanceCode').doc('currentCode').get()
-                    .then((doc) => {
-                      if (doc.exists) {
-                        const validCode = doc.data().code;  // Get the stored 03150405
-                        console.log("Attendance Code:", validCode);  // Log the retrieved 03150405
-                        return validCode;  // Return the 03150405
-                      } else {
+            import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+            
+            // Function to retrieve the attendance code from Firestore
+            const retrieveAttendanceCode = async () => {
+                // Reference the specific document in Firestore
+                const codeDoc = doc(db, 'attendanceCode', 'currentCode');
+                try {
+                    const docSnapshot = await getDoc(codeDoc);
+                    if (docSnapshot.exists()) {
+                        const validCode = docSnapshot.data().code;  // Get the stored code
+                        console.log("Attendance Code:", validCode);  // Log the retrieved code
+                        return validCode;  // Return the code
+                    } else {
                         console.log("No such document found in Firestore.");
                         return null;
-                      }
-                    })
-                    .catch((error) => {
-                      console.error("Error retrieving attendance code:", error);
-                    });
-                };
+                    }
+                } catch (error) {
+                    console.error("Error retrieving attendance code:", error);
+                }
+            };
 
 
             function checkLocation() {
