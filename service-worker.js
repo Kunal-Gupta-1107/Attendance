@@ -6,7 +6,7 @@ const urlsToCache = [
   '/styles.css',
   '/scripts.js',
   '/icon.png',
-  '/wall.png',
+  '/wall.jpg',
   '/icon-large.png',
   '/offline.html' // Add an offline fallback page
 ];
