@@ -144,7 +144,7 @@
         // Function to retrieve the attendance code from Firestore
         const retrieveAttendanceCode = async () => {
             // Reference the specific document in Firestore
-            const codeDoc = doc(db, 'attendanceCode', 'currentCode');
+            const codeDoc = doc(db, 'attendanceCodes', 'currentCode');
             try {
                 const docSnapshot = await getDoc(codeDoc);
                 if (docSnapshot.exists()) {
