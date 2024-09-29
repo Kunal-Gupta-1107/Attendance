@@ -165,6 +165,27 @@
                 return R * c; // Distance in meters
             }
 
+
+            // Function to retrieve the 03150405 from Firestore
+                const retrieveAttendanceCode = () => {
+                  // Reference the specific document in Firestore
+                  firebase.firestore().collection('attendanceCode').doc('currentCode').get()
+                    .then((doc) => {
+                      if (doc.exists) {
+                        const validCode = doc.data().code;  // Get the stored 03150405
+                        console.log("Attendance Code:", validCode);  // Log the retrieved 03150405
+                        return validCode;  // Return the 03150405
+                      } else {
+                        console.log("No such document found in Firestore.");
+                        return null;
+                      }
+                    })
+                    .catch((error) => {
+                      console.error("Error retrieving attendance code:", error);
+                    });
+                };
+
+
             function checkLocation() {
                 return new Promise((resolve, reject) => {
                     if (navigator.geolocation) {
@@ -251,31 +272,36 @@
                 submitButton.disabled = !(nameInput.value && codeInput.value);
             });
 
-            form.addEventListener('submit', async (event) => {
-                event.preventDefault();
-
-                const name = nameInput.value;
-                const attendanceCode = codeInput.value;
-                const isWithinLocation = await checkLocation();
-
-                if (isWithinLocation) {
-                    const currentDate = new Date().toLocaleDateString();
-                    const isDuplicate = await checkDuplicate(name, currentDate);
-
-                    if (!isDuplicate && attendanceCode === currentCode) {
-                        await addAttendance(name, attendanceCode);
-                        alert('Attendance marked successfully!');
-                        nameInput.value = '';
-                        codeInput.value = '';
-                        submitButton.disabled = true;
-                        displayAttendance();
+                form.addEventListener('submit', async (event) => {
+                    event.preventDefault();
+                
+                    const name = nameInput.value;
+                    const attendanceCode = codeInput.value;
+                    const isWithinLocation = await checkLocation();
+                
+                    if (isWithinLocation) {
+                        const currentDate = new Date().toLocaleDateString();
+                        const isDuplicate = await checkDuplicate(name, currentDate);
+                
+                        // Retrieve currentCode from Firestore
+                        const currentCodeDoc = await firebase.firestore().collection('attendanceCode').doc('currentCode').get();
+                        const currentCode = currentCodeDoc.exists ? currentCodeDoc.data().code : null;
+                
+                        if (!isDuplicate && attendanceCode === currentCode) {
+                            await addAttendance(name, attendanceCode);
+                            alert('Attendance marked successfully!');
+                            nameInput.value = '';
+                            codeInput.value = '';
+                            submitButton.disabled = true;
+                            displayAttendance();
+                        } else {
+                            alert(isDuplicate ? 'Attendance already marked for today.' : 'Incorrect attendance code.');
+                        }
                     } else {
-                        alert(isDuplicate ? 'Attendance already marked for today.' : 'Incorrect attendance code.');
+                        alert('Location access denied or outside the required location.');
                     }
-                } else {
-                    alert('Location access denied or outside the required location.');
-                }
-            });
+                });
+
 
             closeModal.addEventListener('click', () => {
                 locationModal.style.display = 'none';
