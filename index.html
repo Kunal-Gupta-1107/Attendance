@@ -265,14 +265,22 @@
                     }
                 });
             }
-
-            nameInput.addEventListener('input', () => {
-                submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
-            });
             
-            codeInput.addEventListener('input', () => {
-                submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
+            nameInput.addEventListener('input', () => {
+                submitButton.disabled = !(nameInput.value && codeInput.value);
             });
+
+            codeInput.addEventListener('input', () => {
+                submitButton.disabled = !(nameInput.value && codeInput.value);
+            });
+
+            // nameInput.addEventListener('input', () => {
+            //     submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
+            // });
+            
+            // codeInput.addEventListener('input', () => {
+            //     submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
+            // });
             
             form.addEventListener('submit', async (event) => {
                 event.preventDefault();
