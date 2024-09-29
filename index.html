@@ -77,10 +77,8 @@
         <input type="text" id="name" placeholder="Enter your name" required>
         <input type="text" id="attendanceCode" placeholder="Enter Attendance Code" required>
         <button type="submit" id="submitButton" disabled>Submit</button>
-        
     </form>
     <h3 id="currentDate"></h3>
-    <h2 id="currentCode"></h2>
 
     <table id="attendanceList">
         <thead>
@@ -96,10 +94,14 @@
     </table>
     <h2>! Disclaimer !</h2>
     <p>For a better user experience, switch to <strong>Desktop mode</strong> .</p>
+<!--     I know you will come.  -->
     <p>Install the app by visiting <strong>Add to Home Screen.</strong></p>
+
+
 
     <button id="installButton">Install App</button> <!-- Install Button -->
     
+<!--     date ke script hai SIGMA -->
     <script>
         const options = { day: 'numeric', month: 'long', year: 'numeric' };
         document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB', options);
@@ -117,7 +119,7 @@
     <script src="scripts.js" type="module"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBFJrziRByYb0EwC2sYfP_cLtiQJlS02cY",
@@ -131,20 +133,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Fetch attendance code from Firestore instead of hardcoding
-        let currentCode = "";
-
-        async function fetchCurrentAttendanceCode() {
-            const docRef = doc(db, "attendance", "currentCode"); // Adjust document path if needed
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                currentCode = docSnap.data().code;
-                console.log("Fetched current code:", currentCode);
-            } else {
-                console.log("No such document!");
-            }
-        }
+        // Hardcoded attendance code
+        const HARD_CODED_CODE = "SIGMA"; // Change this code as needed
+        let currentCode = HARD_CODED_CODE;
 
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('attendanceForm');
@@ -155,12 +146,10 @@
             const installButton = document.getElementById('installButton');
             const locationModal = document.getElementById('locationModal');
             const closeModal = document.getElementById('closeModal');
+            let deferredPrompt;
 
-            const targetLocation = { lat: 27.1862, lon: 78.0031 };
-            //const targetLocation = { lat: 27.1962, lon: 78.0506 };// Change to your target latitude and longitude
+            const targetLocation = { lat: 27.1862, lon: 78.0031 }; // Change to your target latitude and longitude
             const radius = 100; // Distance in meters
-
-            fetchCurrentAttendanceCode(); // Fetch attendance code on page load
 
             function getDistance(lat1, lon1, lat2, lon2) {
                 const R = 6371e3; // Radius of Earth in meters
@@ -197,98 +186,99 @@
                 });
             }
 
-            async function checkDuplicate(name) {
-                const today = new Date();
-                const todayFormatted = today.toISOString().split('T')[0]; // yyyy-mm-dd format
-
-                const attendanceQuery = query(collection(db, "attendance"), where("name", "==", name), where("date", "==", todayFormatted));
+            async function checkDuplicate(name, date) {
+                const attendanceQuery = query(collection(db, "attendance"), where("name", "==", name), where("date", "==", date));
                 const querySnapshot = await getDocs(attendanceQuery);
-
                 return !querySnapshot.empty;
             }
 
             async function addAttendance(name, attendanceCode) {
-                const currentDateISO = new Date().toISOString().split('T')[0]; // Save the date in ISO format
-
                 await addDoc(collection(db, "attendance"), {
                     name: name,
                     attendanceCode: attendanceCode,
                     timestamp: serverTimestamp(),
-                    date: currentDateISO
+                    date: new Date().toLocaleDateString() // Store date as a string
                 });
             }
 
             async function displayAttendance() {
-                attendanceList.innerHTML = ''; // Clear current list
+                attendanceList.innerHTML = ''; // Clear the current attendance list
                 const querySnapshot = await getDocs(collection(db, "attendance"));
-                const records = [];
 
+                const today = new Date(); // Get today's date object
+                const todayStringMMDD = today.toLocaleDateString('en-US'); // mm/dd/yyyy format
+                const todayStringDDMM = today.toLocaleDateString('en-GB'); // dd/mm/yyyy format
+
+                // Iterate through the attendance documents
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
-                    const todayISO = new Date().toISOString().split('T')[0]; // yyyy-mm-dd format
+                    let attendanceDate;
 
-                    if (data.date === todayISO) {
-                        const { name, attendanceCode, timestamp } = data;
-                        const row = `<tr><td>${name}</td><td>${attendanceCode}</td><td>${new Date(timestamp.seconds * 1000).toLocaleString()}</td></tr>`;
-                        records.push(row);
+                    // Check if the date is in mm/dd/yyyy or dd/mm/yyyy format
+                    if (data.date.includes('/')) {
+                        const dateParts = data.date.split('/');
+
+                        if (dateParts.length === 3) {
+                            // Try mm/dd/yyyy format
+                            const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`); // YYYY-MM-DD format
+                            if (mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
+                                attendanceDate = mmddDate;
+                            }
+
+                            // Try dd/mm/yyyy format if mm/dd/yyyy didn't match today
+                            const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`); // YYYY-MM-DD format
+                            if (!attendanceDate && ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
+                                attendanceDate = ddmmDate;
+                            }
+                        }
+                    }
+
+                    // If attendanceDate is valid and matches today's date
+                    if (attendanceDate) {
+                        const row = attendanceList.insertRow();
+                        row.insertCell(0).textContent = data.name; // Name of the student
+                        row.insertCell(1).textContent = "Hidden" // Attendance code
+                        row.insertCell(2).textContent = attendanceDate.toLocaleDateString(); // Shows the date only
                     }
                 });
-                attendanceList.innerHTML = records.join('');
             }
 
-            form.addEventListener('input', () => {
+            nameInput.addEventListener('input', () => {
                 submitButton.disabled = !(nameInput.value && codeInput.value);
             });
 
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
+            codeInput.addEventListener('input', () => {
+                submitButton.disabled = !(nameInput.value && codeInput.value);
+            });
 
-                const name = nameInput.value.trim();
-                const enteredCode = codeInput.value.trim();
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
 
-                if (enteredCode !== currentCode) {
-                    alert("Incorrect Attendance Code. Please try again.");
-                    return;
+                const name = nameInput.value;
+                const attendanceCode = codeInput.value;
+                const isWithinLocation = await checkLocation();
+
+                if (isWithinLocation) {
+                    const currentDate = new Date().toLocaleDateString();
+                    const isDuplicate = await checkDuplicate(name, currentDate);
+
+                    if (!isDuplicate && attendanceCode === currentCode) {
+                        await addAttendance(name, attendanceCode);
+                        alert('Attendance marked successfully!');
+                        nameInput.value = '';
+                        codeInput.value = '';
+                        submitButton.disabled = true;
+                        displayAttendance();
+                    } else {
+                        alert(isDuplicate ? 'Attendance already marked for today.' : 'Incorrect attendance code.');
+                    }
+                } else {
+                    alert('Location access denied or outside the required location.');
                 }
-
-                const isWithinRange = await checkLocation();
-                if (!isWithinRange) {
-                    alert("You are outside the allowed location range.");
-                    return;
-                }
-
-                const isDuplicate = await checkDuplicate(name);
-                if (isDuplicate) {
-                    alert("Attendance already marked for today.");
-                    return;
-                }
-
-                await addAttendance(name, enteredCode);
-                displayAttendance();
-                form.reset();
-                submitButton.disabled = true;
             });
 
             closeModal.addEventListener('click', () => {
                 locationModal.style.display = 'none';
-            });
-
-            let deferredPrompt;
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                installButton.style.display = 'block'; // Show install button when prompt is available
-            });
-
-            installButton.addEventListener('click', async () => {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    console.log('User accepted the A2HS prompt');
-                } else {
-                    console.log('User dismissed the A2HS prompt');
-                }
-                deferredPrompt = null;
             });
 
             displayAttendance();
