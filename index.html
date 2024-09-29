@@ -222,67 +222,60 @@
             async function displayAttendance() {
                 attendanceList.innerHTML = ''; // Clear the current attendance list
                 const querySnapshot = await getDocs(collection(db, "attendance"));
-                 const attendanceRecords = [];
-
-                const today = new Date(); // Get today's date object
-                const todayStringMMDD = today.toLocaleDateString('en-US'); // mm/dd/yyyy format
-                const todayStringDDMM = today.toLocaleDateString('en-GB'); // dd/mm/yyyy format
-
-                // Iterate through the attendance documents
+                const attendanceRecords = [];
+            
+                const today = new Date();
+                
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     let attendanceDate;
                     let hiddenCode = "Hidden";
-
-                    // Check if the date is in mm/dd/yyyy or dd/mm/yyyy format
+            
                     if (data.date.includes('/')) {
                         const dateParts = data.date.split('/');
-
                         if (dateParts.length === 3) {
-                            // Try mm/dd/yyyy format
-                            const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`); // YYYY-MM-DD format
-                            if (mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
+                            const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
+                            if (!isNaN(mmddDate) && mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
                                 attendanceDate = mmddDate;
                             }
-
-                            // Try dd/mm/yyyy format if mm/dd/yyyy didn't match today
-                            const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`); // YYYY-MM-DD format
-                            if (!attendanceDate && ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
+            
+                            const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+                            if (!attendanceDate && !isNaN(ddmmDate) && ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
                                 attendanceDate = ddmmDate;
                             }
                         }
-                    }
-                    else {
-                        data.name="No Record For today";
+                    } else {
+                        data.name = "No Record For Today";
                         hiddenCode = "No Code For Today";
                     }
-
+            
                     if (attendanceDate) {
                         attendanceRecords.push({
                             name: data.name,
                             code: hiddenCode,
                             date: attendanceDate,
-                            timestamp: data.timestamp // Access timestamp directly
+                            timestamp: data.timestamp
                         });
                     }
                 });
-                // ATTENDANCE KO SORT KARANA BHI JURIRU HAI  (KISNE PAHLE OR KISNE BAAD ME.)
-                attendanceRecords.sort((a, b) => a.timestamp - b.timestamp);
-
-                    // If attendanceDate is valid and matches today's date
-                if (attendanceDate) {
+            
+                attendanceRecords.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
+            
+                if (attendanceRecords.length > 0) {
+                    attendanceRecords.forEach((record) => {
+                        const row = attendanceList.insertRow();
+                        row.insertCell(0).textContent = record.name;
+                        row.insertCell(1).textContent = record.code;
+                        row.insertCell(2).textContent = record.date.toLocaleDateString();
+                    });
+                } else {
                     const row = attendanceList.insertRow();
-                    row.insertCell(0).textContent = record.name; // Name of the student
-                    row.insertCell(1).textContent = record.code; // Attendance code
-                    row.insertCell(2).textContent = record.date.toLocaleDateString(); // Shows the date only
+                    row.insertCell(0).textContent = "No Record For Today";
+                    row.insertCell(1).textContent = "No Code For Attendance";
+                    row.insertCell(2).textContent = today.toLocaleDateString();
                 }
-                if (records.length === 0) {
-                    const row = attendanceList.insertRow();
-                    row.insertCell(0).textContent = "No Record For Today";// Provide feedback if no records
-                    row.insertCell(1).textContent = "No Code For Attendance"; // Attendance code
-                    row.insertCell(2).textContent = record.date.toLocaleDateString(); // Shows the date only
-                }
-            } // End of ();
+            }
+                                     // End of ();
 
             nameInput.addEventListener('input', () => {
                 submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
