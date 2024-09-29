@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Records</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="./manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                }, function(error) {
+                    console.log('Service Worker registration failed:', error);
+                });
+            });
+        }
+    </script>
+</head>
+<body>
+    <div class="container2"><center>
+        <h3 id="currentDate"></h3>
+
+        <table id="attendanceList">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Attendance Code</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Attendance records will be populated here -->
+            </tbody>
+        </table>
+
+        <BR><h2>! Disclaimer !</h2>
+        <p>For a better user experience, switch to <strong>Desktop mode</strong>.</p><BR>
+        <p>Install the app by visiting <strong>Add to Home Screen.</strong></p><BR>    
+
+        <button id="installButton">Install App</button> <!-- Install Button -->
+        <p>You have successfully marked your attendance.</p>
+        <a href="fullcheck_dontknow.html">Back To Page</a>
+        </center>
+    </div>  
+	<script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFJrziRByYb0EwC2sYfP_cLtiQJlS02cY",
+            authDomain: "attendance-38541.firebaseapp.com",
+            projectId: "attendance-38541",
+            storageBucket: "attendance-38541.appspot.com",
+            messagingSenderId: "439358946279",
+            appId: "1:439358946279:web:fe466a68db5e8ad77f1b42"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('attendanceForm');
+            const nameInput = document.getElementById('name');
+            const codeInput = document.getElementById('attendanceCode');
+            const submitButton = document.getElementById('submitButton');
+            const attendanceList = document.getElementById('attendanceList').getElementsByTagName('tbody')[0];
+            const installButton = document.getElementById('installButton');
+            const locationModal = document.getElementById('locationModal');
+            const closeModal = document.getElementById('closeModal');
+            let deferredPrompt;
+
+     
+
+            async function displayAttendance() {
+                attendanceList.innerHTML = ''; // Clear the current attendance list
+                const querySnapshot = await getDocs(collection(db, "attendance"));
+                const attendanceRecords = [];
+            
+                const today = new Date();
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    let attendanceDate;
+                    let hiddenCode = "Hidden";
+            
+                    if (data.date.includes('/')) {
+                        const dateParts = data.date.split('/');
+                        if (dateParts.length === 3) {
+                            const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
+                            if (!isNaN(mmddDate) && mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
+                                attendanceDate = mmddDate;
+                            }
+            
+                            const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+                            if (!attendanceDate && !isNaN(ddmmDate) && ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
+                                attendanceDate = ddmmDate;
+                            }
+                        }
+                    }
+            
+                    if (attendanceDate) {
+                        attendanceRecords.push({
+                            name: data.name,
+                            code: hiddenCode,
+                            date: attendanceDate,
+                            timestamp: data.timestamp
+                        });
+                    }
+                });
+            
+                attendanceRecords.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
+            
+                if (attendanceRecords.length > 0) {
+                    attendanceRecords.forEach((record) => {
+                        const row = attendanceList.insertRow();
+                        row.insertCell(0).textContent = record.name;
+                        row.insertCell(1).textContent = record.code;
+                        row.insertCell(2).textContent = record.date.toLocaleDateString();
+                    });
+                } else {
+                    const row = attendanceList.insertRow();
+                    row.insertCell(0).textContent = "No Record For Today";
+                    row.insertCell(1).textContent = "No Code For Attendance";
+                    row.insertCell(2).textContent = today.toLocaleDateString();
+                }
+            }
+                                     // End of ();
+            displayAttendance();
+        });
+    </script>
+
+    </body>
+</html>
