@@ -2,9 +2,11 @@ const CACHE_NAME = 'attendance-app-cache-v2';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/index2.html',
   '/styles.css',
   '/scripts.js',
   '/icon.png',
+  '/wall.png',
   '/icon-large.png',
   '/offline.html' // Add an offline fallback page
 ];
