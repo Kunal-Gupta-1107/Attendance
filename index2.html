@@ -43,8 +43,14 @@
         <p>You have successfully marked your attendance.</p>
         <a href="index.html">Back To Page</a>
         </center>
-    </div>  
-	<script type="module">
+    </div>
+	
+    <script>
+	const options = { day: 'numeric', month: 'long', year: 'numeric' };
+	document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB', options);
+    </script>
+
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
