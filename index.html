@@ -17,95 +17,41 @@
             });
         }
     </script>
-    <style>
-        /* Simple modal styles */
-        #locationModal {
-            display: none; 
-            position: fixed; 
-            z-index: 1000; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            height: 100%; 
-            background-color: rgba(0, 0, 0, 0.5); 
-            justify-content: center; 
-            align-items: center;
-        }
-        #modalContent {
-            background-color: white; 
-            padding: 20px; 
-            border-radius: 5px; 
-            text-align: center;
-        }
-        #closeModal {
-            cursor: pointer; 
-            background-color: #007BFF; 
-            color: white; 
-            border: none; 
-            padding: 10px; 
-            border-radius: 5px;
-        }
-        #installButton {
-            display: none; /* Initially hidden */
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 5px;
-            margin-top: 20px; /* Add some margin for spacing */
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
 </head>
 <body>
-    <h1>Attendance Form</h1>
+
+    <div class="container">
+        <form id="attendanceForm" class="attendance-form">
+            <h1>Attendance</h1>
+            <div class="input-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="input-group">
+                <label for="code">Code</label>
+                <input type="text" id="attendanceCode" required>
+            </div>
+            <div class="submit-button">
+                <button type="submit" id="submitButton" disabled>Submit</button>
+            </div>
+            <div class="submit-button">
+                <button type="button" onclick="window.location.href='index2.html';">See Attendance</button>
+            </div>
+        </form>
+    </div>
+    <!-- <h1>Attendance Form</h1>
     <form id="attendanceForm">
-        <input type="text" id="name" placeholder="Enter your name" required>
-        <input type="text" id="attendanceCode" placeholder="Enter Attendance Code" required>
+        <input type="text" id="name" placeholder="Enter your name" required><br>
+        <input type="text" id="attendanceCode" placeholder="Enter Attendance Code" required><br>
         <button type="submit" id="submitButton" disabled>Submit</button>
-    </form>
-    <h3 id="currentDate"></h3>
+    </form> -->
 
-    <table id="attendanceList">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Attendance Code</th>
-                <th>Timestamp</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Attendance records will be populated here -->
-        </tbody>
-    </table>
-    <h2>! Disclaimer !</h2>
-    <p>For a better user experience, switch to <strong>Desktop mode</strong> .</p>
-<!--     I know you will come.  -->
-    <p>Install the app by visiting <strong>Add to Home Screen.</strong></p>
-
-
-
-    <button id="installButton">Install App</button> <!-- Install Button -->
+    <div id="attendanceList">
+        <!-- Attendance records will be populated here -->
+    </div>
     
-<!--     date ke script hai SIGMA -->
-    <script>
-        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB', options);
-    </script>
+
+
 
     <!-- Modal for location request -->
     <div id="locationModal">
@@ -116,7 +62,6 @@
         </div>
     </div>
 
-    <script src="scripts.js" type="module"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
@@ -219,60 +164,6 @@
                 });
             }
 
-            async function displayAttendance() {
-                attendanceList.innerHTML = ''; // Clear the current attendance list
-                const querySnapshot = await getDocs(collection(db, "attendance"));
-                const attendanceRecords = [];
-            
-                const today = new Date();
-                
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    let attendanceDate;
-                    let hiddenCode = "Hidden";
-            
-                    if (data.date.includes('/')) {
-                        const dateParts = data.date.split('/');
-                        if (dateParts.length === 3) {
-                            const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
-                            if (!isNaN(mmddDate) && mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
-                                attendanceDate = mmddDate;
-                            }
-            
-                            const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
-                            if (!attendanceDate && !isNaN(ddmmDate) && ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
-                                attendanceDate = ddmmDate;
-                            }
-                        }
-                    }
-            
-                    if (attendanceDate) {
-                        attendanceRecords.push({
-                            name: data.name,
-                            code: hiddenCode,
-                            date: attendanceDate,
-                            timestamp: data.timestamp
-                        });
-                    }
-                });
-            
-                attendanceRecords.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
-            
-                if (attendanceRecords.length > 0) {
-                    attendanceRecords.forEach((record) => {
-                        const row = attendanceList.insertRow();
-                        row.insertCell(0).textContent = record.name;
-                        row.insertCell(1).textContent = record.code;
-                        row.insertCell(2).textContent = record.date.toLocaleDateString();
-                    });
-                } else {
-                    const row = attendanceList.insertRow();
-                    row.insertCell(0).textContent = "No Record For Today";
-                    row.insertCell(1).textContent = "No Code For Attendance";
-                    row.insertCell(2).textContent = today.toLocaleDateString();
-                }
-            }
-                                     // End of ();
 
             nameInput.addEventListener('input', () => {
                 submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
@@ -310,11 +201,12 @@
                 }
             });
 
-            closeModal.addEventListener('click', () => {
-                locationModal.style.display = 'none';
-            });
+            
 
             displayAttendance();
+        });
+        closeModal.addEventListener('click', () => {
+            locationModal.style.display = 'none';
         });
     </script>
 </body>
