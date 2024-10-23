@@ -41,12 +41,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const codeInput = document.getElementById('attendanceCode');
     const submitButton = document.getElementById('submitButton');
     const attendanceList = document.getElementById('attendanceList').getElementsByTagName('tbody')[0];
-    const attendanceList = document.getElementById('attendanceList').getElementsByTagName('tbody')[0];
     const locationModal = document.getElementById('locationModal');
     const closeModal = document.getElementById('closeModal');
     let deferredPrompt;
+    console.log("i am called0");
+    displayAttendance();
 
     async function displayAttendance() {
+        console.log("i am called");
         attendanceList.innerHTML = ''; // Clear the current attendance list
         const querySnapshot = await getDocs(collection(db, "attendance"));
         const attendanceRecords = [];
@@ -98,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
             row.insertCell(1).textContent = "No Code For Attendance";
             row.insertCell(2).textContent = today.toLocaleDateString();
         }
+        
     }
     
 
