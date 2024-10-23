@@ -202,8 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('loading-spinner-container').style.display = 'none';
         }
     });
-        
-});
-closeModal.addEventListener('click', () => {
-    locationModal.style.display = 'none';
+    closeModal.addEventListener('click', () => {
+        locationModal.style.display = 'none';
+    });
 });
