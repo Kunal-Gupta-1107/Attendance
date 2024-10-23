@@ -7,8 +7,8 @@ const urlsToCache = [
   '/scripts.js',
   '/icon.png',
   '/wall.jpg',
-  '/icon-large.png',
-  '/offline.html' // Add an offline fallback page
+  '/madepng.png',
+  '/offline.html'
 ];
 
 // Install event: Cache important resources
