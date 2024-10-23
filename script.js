@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const codeInput = document.getElementById('attendanceCode');
     const submitButton = document.getElementById('submitButton');
     const attendanceList = document.getElementById('attendanceList').getElementsByTagName('tbody')[0];
+    const attendanceList = document.getElementById('attendanceList').getElementsByTagName('tbody')[0];
     const locationModal = document.getElementById('locationModal');
     const closeModal = document.getElementById('closeModal');
     let deferredPrompt;
