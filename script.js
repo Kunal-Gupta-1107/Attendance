@@ -97,7 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
             row.insertCell(1).textContent = "No Code For Attendance";
             row.insertCell(2).textContent = today.toLocaleDateString();
         }
-        displayAttendance();
     }
     
 
