@@ -49,7 +49,22 @@
         <a href="index.html">Back To Page</a>
         </center>
     </div>
-	
+	<div id="loading-spinner-container" class="spinner-container" style="display: none;">
+        <div class="sk-circle" style="--sk-size: 60px; --sk-color: #3498db;">
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+          <div class="sk-circle-dot"></div>
+        </div>
+      </div>
     <script>
 	const options = { day: 'numeric', month: 'long', year: 'numeric' };
 	document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-GB', options);
