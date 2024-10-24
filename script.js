@@ -44,8 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationModal = document.getElementById('locationModal');
     const closeModal = document.getElementById('closeModal');
     let deferredPrompt;
-    console.log("i am called0");
+    document.getElementById('seeFriendsButton').addEventListener('click', () => {
     displayAttendance();
+        console.log("i am called0");
+    });
 
     async function displayAttendance() {
         console.log("i am called");
