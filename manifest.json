@@ -11,5 +11,6 @@
   "start_url": "/Attendance/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000"
+  "theme_color": "#000000",
+  "version": "1.0"
 }
