@@ -174,6 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 async function displayAttendance() {
+        const attendanceList = document.getElementById('attendanceList').getElementsByTagName('tbody')[0];
         attendanceList.innerHTML = ''; // Clear the current attendance list
         const querySnapshot = await getDocs(collection(db, "attendance"));
         const attendanceRecords = [];
