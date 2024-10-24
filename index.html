@@ -9,7 +9,7 @@
     <link rel="icon" href="icon.png" type="image/png">
     <link rel="manifest" href="./manifest.json">
     <script>
-        if ('serviceWorker' in navigator) {
+        if ('service-worker.js' in navigator) { // serviceWorker --> service-worker.js
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
                     console.log('Service Worker registered with scope:', registration.scope);
