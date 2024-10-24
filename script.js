@@ -49,62 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     displayAttendance();
         console.log("i am called0");
     });
-
-    async function displayAttendance() {
-        console.log("i am called");
-        attendanceList.innerHTML = ''; // Clear the current attendance list
-        const querySnapshot = await getDocs(collection(db, "attendance"));
-        const attendanceRecords = [];
-    
-        const today = new Date();
-        
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            let attendanceDate;
-            let hiddenCode = "Hidden";
-    
-            if (data.date && data.date.includes('/')) {
-                const dateParts = data.date.split('/');
-                if (dateParts.length === 3) {
-                    const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
-                    if (!isNaN(mmddDate) && mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
-                        attendanceDate = mmddDate;
-                    }
-    
-                    const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
-                    if (!attendanceDate && !isNaN(ddmmDate) && ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
-                        attendanceDate = ddmmDate;
-                    }
-                }
-            }
-    
-            if (attendanceDate) {
-                attendanceRecords.push({
-                    name: data.name,
-                    code: hiddenCode,
-                    date: attendanceDate,
-                    timestamp: data.timestamp
-                });
-            }
-        });
-    
-        attendanceRecords.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
-    
-        if (attendanceRecords.length > 0) {
-            attendanceRecords.forEach((record) => {
-                const row = attendanceList.insertRow();
-                row.insertCell(0).textContent = record.name;
-                row.insertCell(1).textContent = record.code;
-                row.insertCell(2).textContent = record.date.toLocaleDateString();
-            });
-        } else {
-            const row = attendanceList.insertRow();
-            row.insertCell(0).textContent = "No Record For Today";
-            row.insertCell(1).textContent = "No Code For Attendance";
-            row.insertCell(2).textContent = today.toLocaleDateString();
-        }
-        
-    }
     
 
     const targetLocation = { lat: 27.1862, lon: 78.0031 }; // Change to your target latitude and longitude
@@ -212,3 +156,58 @@ document.addEventListener('DOMContentLoaded', () => {
         locationModal.style.display = 'none';
     });
 });
+async function displayAttendance() {
+        console.log("i am called");
+        attendanceList.innerHTML = ''; // Clear the current attendance list
+        const querySnapshot = await getDocs(collection(db, "attendance"));
+        const attendanceRecords = [];
+    
+        const today = new Date();
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            let attendanceDate;
+            let hiddenCode = "Hidden";
+    
+            if (data.date && data.date.includes('/')) {
+                const dateParts = data.date.split('/');
+                if (dateParts.length === 3) {
+                    const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
+                    if (!isNaN(mmddDate) && mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
+                        attendanceDate = mmddDate;
+                    }
+    
+                    const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+                    if (!attendanceDate && !isNaN(ddmmDate) && ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
+                        attendanceDate = ddmmDate;
+                    }
+                }
+            }
+    
+            if (attendanceDate) {
+                attendanceRecords.push({
+                    name: data.name,
+                    code: hiddenCode,
+                    date: attendanceDate,
+                    timestamp: data.timestamp
+                });
+            }
+        });
+    
+        attendanceRecords.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
+    
+        if (attendanceRecords.length > 0) {
+            attendanceRecords.forEach((record) => {
+                const row = attendanceList.insertRow();
+                row.insertCell(0).textContent = record.name;
+                row.insertCell(1).textContent = record.code;
+                row.insertCell(2).textContent = record.date.toLocaleDateString();
+            });
+        } else {
+            const row = attendanceList.insertRow();
+            row.insertCell(0).textContent = "No Record For Today";
+            row.insertCell(1).textContent = "No Code For Attendance";
+            row.insertCell(2).textContent = today.toLocaleDateString();
+        }
+        
+    }
