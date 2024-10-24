@@ -44,12 +44,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationModal = document.getElementById('locationModal');
     const closeModal = document.getElementById('closeModal');
     let deferredPrompt;
-    console.log("i am called0.1");
-    document.getElementById('seeFriendsButton').addEventListener('click', () => {
-    displayAttendance();
-        console.log("i am called0");
-    });
-    
+    const seeFriendsButton = document.getElementById('seeFriendsButton');
+    if (seeFriendsButton) {
+        seeFriendsButton.addEventListener('click', async () => {
+            window.location.href = 'index2.html';
+        });
+    }
+
+    // Check if the 'refreshResult' button exists before adding an event listener
+    const refreshResultButton = document.getElementById('refreshResult');
+    if (refreshResultButton) {
+        refreshResultButton.addEventListener('click', async () => {
+            await displayAttendance();
+        });
+    }
+   
 
     const targetLocation = { lat: 27.1862, lon: 78.0031 }; // Change to your target latitude and longitude
     const radius = 100; // Distance in meters
@@ -106,58 +115,63 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (nameInput) { // coz isn't in 2
+        nameInput.addEventListener('input', () => {
+            submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
 
-    nameInput.addEventListener('input', () => {
-        submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
+        });
+    }
+    if (codeInput) { // coz isn't in 2
+        codeInput.addEventListener('input', () => {
+            submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());  
+        });
+    }
 
-    });
-
-    codeInput.addEventListener('input', () => {
-        submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());  
-    });
-
-    form.addEventListener('submit', async (event) => {
-        event.preventDefault();
-    
-        // Show the spinner when form submission starts
-        document.getElementById('loading-spinner-container').style.display = 'flex';
-    
-        try {
-            const name = nameInput.value.trim();
-            const attendanceCode = codeInput.value.trim();
-            const isWithinLocation = await checkLocation();
-            const currentCode = await retrieveAttendanceCode();
-    
-            if (isWithinLocation) {
-                const currentDate = new Date().toLocaleDateString();
-                const isDuplicate = await checkDuplicate(name, currentDate);
-    
-                if (!isDuplicate && attendanceCode === currentCode) {
-                    await addAttendance(name, attendanceCode);
-                    alert('Attendance marked successfully!');
-                    nameInput.value = '';
-                    codeInput.value = '';
-                    submitButton.disabled = true;
+    if(form) { // coz isn't in 2
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+        
+            // Show the spinner when form submission starts
+            document.getElementById('loading-spinner-container').style.display = 'flex';
+        
+            try {
+                const name = nameInput.value.trim();
+                const attendanceCode = codeInput.value.trim();
+                const isWithinLocation = await checkLocation();
+                const currentCode = await retrieveAttendanceCode();
+        
+                if (isWithinLocation) {
+                    const currentDate = new Date().toLocaleDateString();
+                    const isDuplicate = await checkDuplicate(name, currentDate);
+        
+                    if (!isDuplicate && attendanceCode === currentCode) {
+                        await addAttendance(name, attendanceCode);
+                        alert('Attendance marked successfully!');
+                        nameInput.value = '';
+                        codeInput.value = '';
+                        submitButton.disabled = true;
+                    } else {
+                        alert(isDuplicate ? 'Attendance already marked for today.' : 'Incorrect attendance code.');
+                    }
                 } else {
-                    alert(isDuplicate ? 'Attendance already marked for today.' : 'Incorrect attendance code.');
+                    alert('Location access denied or outside the required location.');
                 }
-            } else {
-                alert('Location access denied or outside the required location.');
+            } catch (error) {
+                console.error('Error during attendance submission:', error);
+                alert('An error occurred. Please try again.');
+            } finally {
+                // Hide the spinner after all operations are complete
+                document.getElementById('loading-spinner-container').style.display = 'none';
             }
-        } catch (error) {
-            console.error('Error during attendance submission:', error);
-            alert('An error occurred. Please try again.');
-        } finally {
-            // Hide the spinner after all operations are complete
-            document.getElementById('loading-spinner-container').style.display = 'none';
-        }
-    });
-    closeModal.addEventListener('click', () => {
-        locationModal.style.display = 'none';
-    });
+        });
+    }
+    if(closeModal) { // coz isn't in 2
+        closeModal.addEventListener('click', () => {
+            locationModal.style.display = 'none';
+        });
+    }
 });
 async function displayAttendance() {
-        console.log("i am called");
         attendanceList.innerHTML = ''; // Clear the current attendance list
         const querySnapshot = await getDocs(collection(db, "attendance"));
         const attendanceRecords = [];
