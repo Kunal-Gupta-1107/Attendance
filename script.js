@@ -1,64 +1,229 @@
-const CACHE_NAME = 'attendance-app-cache-v2';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/index2.html',
-  '/styles.css',
-  '/scripts.js',
-  '/icon.png',
-  '/wall.jpg',
-  '/madepng.png',
-  '/offline.html'
-];
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-// Install event: Cache important resources
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('Opened cache');
-      return cache.addAll(urlsToCache);
-    })
-  );
-  self.skipWaiting(); // Activate the new service worker immediately
-});
+const firebaseConfig = {
+    apiKey: "AIzaSyBFJrziRByYb0EwC2sYfP_cLtiQJlS02cY",
+    authDomain: "attendance-38541.firebaseapp.com",
+    projectId: "attendance-38541",
+    storageBucket: "attendance-38541.appspot.com",
+    messagingSenderId: "439358946279",
+    appId: "1:439358946279:web:fe466a68db5e8ad77f1b42"
+};
 
-// Fetch event: Serve cached content or fallback to network
-self.addEventListener('fetch', (event) => {
-  // Only cache GET requests to avoid caching sensitive data sent via POST/PUT/DELETE
-  if (event.request.method !== 'GET') {
-    return;
-  }
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Return cached response if available, else fetch from network
-      return response || fetch(event.request).then((networkResponse) => {
-        // Optionally, you can cache the new response if necessary:
-        return caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, networkResponse.clone());
-          return networkResponse;
+
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+// Function to retrieve the attendance code from Firestore
+const retrieveAttendanceCode = async () => {
+    // Reference the specific document in Firestore
+    const codeDoc = doc(db, 'attendanceCodes', 'currentCode');
+    try {
+        const docSnapshot = await getDoc(codeDoc);
+        if (docSnapshot.exists()) {
+            const validCode = docSnapshot.data().code;  // Get the stored code
+            console.log("Attendance Code: Beta Code to Hidden hai");  // Log the retrieved code
+            return validCode;  // Return the code
+        } else {
+            console.log("No such document found in Firestore.");
+            return null;
+        }
+    } catch (error) {
+        console.error("Error retrieving attendance code:", error);
+    }
+};
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('attendanceForm');
+    const nameInput = document.getElementById('name');
+    const codeInput = document.getElementById('attendanceCode');
+    const submitButton = document.getElementById('submitButton');
+    const attendanceList = document.getElementById('attendanceList').getElementsByTagName('tbody')[0];
+    const locationModal = document.getElementById('locationModal');
+    const closeModal = document.getElementById('closeModal');
+    let deferredPrompt;
+    const seeFriendsButton = document.getElementById('seeFriendsButton');
+    if (seeFriendsButton) {
+        seeFriendsButton.addEventListener('click', async () => {
+            window.location.href = 'index2.html';
         });
-      });
-    }).catch(() => {
-      // If both cache and network fail, show an offline fallback
-      return caches.match('/offline.html');
-    })
-  );
-});
+    }
 
-// Activate event: Clean up old caches
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-  self.clients.claim(); // Immediately take control of open pages
+    // Check if the 'refreshResult' button exists before adding an event listener
+    const refreshResultButton = document.getElementById('refreshResult');
+    if (refreshResultButton) {
+        refreshResultButton.addEventListener('click', async () => {
+            document.getElementById('loading-spinner-container').style.display = 'flex';
+            await displayAttendance();
+            document.getElementById('loading-spinner-container').style.display = 'none';
+        });
+    }
+   
+
+    const targetLocation = { lat: 27.1862, lon: 78.0031 }; // Change to your target latitude and longitude
+    const radius = 100; // Distance in meters
+
+    function getDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371e3; // Radius of Earth in meters
+        const φ1 = lat1 * Math.PI / 180;
+        const φ2 = lat2 * Math.PI / 180;
+        const Δφ = (lat2 - lat1) * Math.PI / 180;
+        const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+        const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                    Math.cos(φ1) * Math.cos(φ2) *
+                    Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // Distance in meters
+    }
+
+    function checkLocation() {
+        return new Promise((resolve, reject) => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        const distance = getDistance(latitude, longitude, targetLocation.lat, targetLocation.lon);
+                        resolve(distance <= radius);
+                    },
+                    (error) => {
+                        locationModal.style.display = 'flex';
+                        reject(false);
+                    }
+                );
+            } else {
+                locationModal.style.display = 'flex';
+                reject(false);
+            }
+        });
+    }
+
+    
+
+    async function checkDuplicate(name, date) {
+        const attendanceQuery = query(collection(db, "attendance"), where("name", "==", name), where("date", "==", date));
+        const querySnapshot = await getDocs(attendanceQuery);
+        return !querySnapshot.empty;
+    }
+
+    async function addAttendance(name, attendanceCode) {
+        await addDoc(collection(db, "attendance"), {
+            name: name,
+            attendanceCode: attendanceCode,
+            timestamp: serverTimestamp(),
+            date: new Date().toLocaleDateString() // Store date as a string
+        });
+    }
+
+    if (nameInput) { // coz isn't in 2
+        nameInput.addEventListener('input', () => {
+            submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());
+
+        });
+    }
+    if (codeInput) { // coz isn't in 2
+        codeInput.addEventListener('input', () => {
+            submitButton.disabled = !(nameInput.value.trim() && codeInput.value.trim());  
+        });
+    }
+
+    if(form) { // coz isn't in 2
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+        
+            // Show the spinner when form submission starts
+            document.getElementById('loading-spinner-container').style.display = 'flex';
+        
+            try {
+                const name = nameInput.value.trim();
+                const attendanceCode = codeInput.value.trim();
+                const isWithinLocation = await checkLocation();
+                const currentCode = await retrieveAttendanceCode();
+        
+                if (isWithinLocation) {
+                    const currentDate = new Date().toLocaleDateString();
+                    const isDuplicate = await checkDuplicate(name, currentDate);
+        
+                    if (!isDuplicate && attendanceCode === currentCode) {
+                        await addAttendance(name, attendanceCode);
+                        alert('Attendance marked successfully!');
+                        nameInput.value = '';
+                        codeInput.value = '';
+                        submitButton.disabled = true;
+                    } else {
+                        alert(isDuplicate ? 'Attendance already marked for today.' : 'Incorrect attendance code.');
+                    }
+                } else {
+                    alert('Location access denied or outside the required location.');
+                }
+            } catch (error) {
+                console.error('Error during attendance submission:', error);
+                alert('An error occurred. Please try again.');
+            } finally {
+                // Hide the spinner after all operations are complete
+                document.getElementById('loading-spinner-container').style.display = 'none';
+            }
+        });
+    }
+    if(closeModal) { // coz isn't in 2
+        closeModal.addEventListener('click', () => {
+            locationModal.style.display = 'none';
+        });
+    }
 });
+async function displayAttendance() {
+        attendanceList.innerHTML = ''; // Clear the current attendance list
+        const querySnapshot = await getDocs(collection(db, "attendance"));
+        const attendanceRecords = [];
+    
+        const today = new Date();
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            let attendanceDate;
+            let hiddenCode = "Hidden";
+    
+            if (data.date && data.date.includes('/')) {
+                const dateParts = data.date.split('/');
+                if (dateParts.length === 3) {
+                    const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
+                    if (!isNaN(mmddDate) && mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
+                        attendanceDate = mmddDate;
+                    }
+    
+                    const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+                    if (!attendanceDate && !isNaN(ddmmDate) && ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
+                        attendanceDate = ddmmDate;
+                    }
+                }
+            }
+    
+            if (attendanceDate) {
+                attendanceRecords.push({
+                    name: data.name,
+                    code: hiddenCode,
+                    date: attendanceDate,
+                    timestamp: data.timestamp
+                });
+            }
+        });
+    
+        attendanceRecords.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
+    
+        if (attendanceRecords.length > 0) {
+            attendanceRecords.forEach((record) => {
+                const row = attendanceList.insertRow();
+                row.insertCell(0).textContent = record.name;
+                row.insertCell(1).textContent = record.code;
+                row.insertCell(2).textContent = record.date.toLocaleDateString();
+            });
+        } else {
+            const row = attendanceList.insertRow();
+            row.insertCell(0).textContent = "No Record For Today";
+            row.insertCell(1).textContent = "No Code For Attendance";
+            row.insertCell(2).textContent = today.toLocaleDateString();
+        }
+        
+    }
