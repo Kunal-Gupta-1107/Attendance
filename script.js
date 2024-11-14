@@ -167,6 +167,41 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Select the install button
+    const installButton = document.getElementById("installButton");
+
+    // Listen for the beforeinstallprompt event
+    window.addEventListener("beforeinstallprompt", (e) => {
+        // Prevent the mini-infobar from appearing
+        e.preventDefault();
+
+        // Store the event for later use
+        window.deferredPrompt = e;
+
+        // Make the install button visible
+        installButton.style.display = "block";
+    });
+
+    // Handle the install button click
+    installButton.addEventListener("click", async () => {
+        const deferredPrompt = window.deferredPrompt;
+
+        if (deferredPrompt) {
+            // Show the install prompt
+            deferredPrompt.prompt();
+
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+
+            // Reset the deferredPrompt variable since it can only be used once
+            window.deferredPrompt = null;
+
+            // Hide the install button after the prompt is handled
+            installButton.style.display = "none";
+        }
+    });
+
     if(closeModal) { // coz isn't in 2
         closeModal.addEventListener('click', () => {
             locationModal.style.display = 'none';
@@ -174,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 async function displayAttendance() {
-        const attendanceList = document.getElementById('attendanceList').getElementsByTagName('tbody')[0];
+    const attendanceList = document.getElementById('attendanceList').getElementsByTagName('tbody')[0];
         attendanceList.innerHTML = ''; // Clear the current attendance list
         const querySnapshot = await getDocs(collection(db, "attendance"));
         const attendanceRecords = [];
