@@ -19,18 +19,19 @@
         }
     </script>
     <script>
-    document.addEventListener('contextmenu', (e) => e.preventDefault()); // Disable right-click
-    
-    document.addEventListener('keydown', (e) => {
-      // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
-      if (
-        e.key === "F12" || 
-        (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(e.key)) || 
-        (e.ctrlKey && e.key === "U")
-      ) {
-        e.preventDefault();
-      }
-    });
+        document.addEventListener('contextmenu', (e) => e.preventDefault()); // Disable right-click
+
+        document.addEventListener('keydown', (e) => {
+          // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, and Ctrl+U
+          if (
+            e.code === "F12" || 
+            (e.ctrlKey && e.shiftKey && ["KeyI", "KeyJ", "KeyC"].includes(e.code)) || 
+            (e.ctrlKey && e.code === "KeyU")
+          ) {
+            e.preventDefault();
+          }
+        });
+        
   </script>
 </head>
 <body>
@@ -49,9 +50,7 @@
                 <!-- Attendance records will be populated here -->
             </tbody>
         </table>
-
-        <BR>
-        <p>Install the app by visiting <strong>Add to Home Screen.</strong></p><BR>    
+        <BR>    
 
         <button id="installButton">Install App</button> <!-- Install Button -->
         <div class="submit-button">
