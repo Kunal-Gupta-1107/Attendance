@@ -186,9 +186,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     installButton.style.display = "none";
                 }
             });
-        } else {
-            console.warn("Install button not found in this HTML file.");
-        }
+        } //else {
+        //     console.warn("Install button not found in this HTML file.");
+        // }
 
     if(closeModal) { // coz isn't in 2
         closeModal.addEventListener('click', () => {
