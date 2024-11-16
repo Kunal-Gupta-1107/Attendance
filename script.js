@@ -168,39 +168,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Select the install button
-    const installButton = document.getElementById("installButton");
-
-    // Listen for the beforeinstallprompt event
-    window.addEventListener("beforeinstallprompt", (e) => {
-        // Prevent the mini-infobar from appearing
-        e.preventDefault();
-
-        // Store the event for later use
-        window.deferredPrompt = e;
-
-        // Make the install button visible
-        installButton.style.display = "block";
-    });
-
-    // Handle the install button click
-    installButton.addEventListener("click", async () => {
-        const deferredPrompt = window.deferredPrompt;
-
-        if (deferredPrompt) {
-            // Show the install prompt
-            deferredPrompt.prompt();
-
-            // Wait for the user to respond to the prompt
-            const { outcome } = await deferredPrompt.userChoice;
-
-            // Reset the deferredPrompt variable since it can only be used once
-            window.deferredPrompt = null;
-
-            // Hide the install button after the prompt is handled
-            installButton.style.display = "none";
+        const installButton = document.getElementById("installButton");
+        
+        if (installButton) {
+            window.addEventListener("beforeinstallprompt", (e) => {
+                e.preventDefault();
+                window.deferredPrompt = e;
+                installButton.style.display = "block";
+            });
+            installButton.addEventListener("click", async () => {
+                const deferredPrompt = window.deferredPrompt;
+        
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    window.deferredPrompt = null;
+                    installButton.style.display = "none";
+                }
+            });
+        } else {
+            console.warn("Install button not found in this HTML file.");
         }
-    });
 
     if(closeModal) { // coz isn't in 2
         closeModal.addEventListener('click', () => {
