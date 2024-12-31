@@ -32,6 +32,7 @@
         e.preventDefault();
       }
     });
+
   </script>
 </head>
 <body>
@@ -53,6 +54,32 @@
                 <button type="button" id="seeFriendsButton">See Attendance</button>
             </div>
         </form>
+    </div>
+    <!-- BOX -->
+    <div id="open-chat-button" class="chatbot-icon">
+        <img src="gp-icon.png" alt="Group" /> 
+    </div>
+
+    <div id="chat-section" class="chat-section">
+        <div class="chat-header">
+            <img src="icon.png" alt="i" class="img-logo">
+            <span><b>The Fake Group</b></span>
+            <button class="button-1" id="close-chat-button">X</button>
+        </div>
+        <div class="chat-body">
+            <div class="message default-msg">
+              <p>Welcome to <strong>The Fake Group</strong> chat!</p>
+              <span class="message-time">10:30 AM</span>
+            </div>
+            <p> Must Read our <a href="https://kunal-gupta-1107.github.io/Attendance/T&C.html">T&C.</a></p>
+            <span class="message-time">10:30 AM</span>
+            <!-- more dynamic msg here -->
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="chat-input" placeholder="What's on your mind today ?">
+            <button class="button-2" id="send-button">Send</button>
+              
+          </div>
     </div>
 <!-- Spinner Container -->
 <div id="loading-spinner-container" class="spinner-container" style="display: none;">
