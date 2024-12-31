@@ -45,6 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModal = document.getElementById('closeModal');
     let deferredPrompt;
     const seeFriendsButton = document.getElementById('seeFriendsButton');
+    // Chatbox functionality
+    
+    
+    
+    const timeButton = document.getElementById('time-btn');
+
     if (seeFriendsButton) {
         seeFriendsButton.addEventListener('click', async () => {
             window.location.href = 'index2.html';
@@ -195,6 +201,55 @@ document.addEventListener('DOMContentLoaded', () => {
             locationModal.style.display = 'none';
         });
     }
+
+    const closeChatButton = document.getElementById('close-chat-button');
+    if (closeChatButton) {
+        closeChatButton.addEventListener('click', () => {
+            const chatSection = document.getElementById('chat-section');
+            if (chatSection) {
+                chatSection.style.display = 'none';
+            }
+        });
+    } 
+    const chatButton = document.getElementById('open-chat-button');
+    if (chatButton) {
+        chatButton.addEventListener('click', () => {
+            const chatSection = document.getElementById('chat-section');
+            if (chatSection) {
+                chatSection.style.display = 'block';
+            }
+        });
+    }
+    const chatInput = document.getElementById("chat-input");
+    if (chatInput) {
+        chatInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                // console.log("Enter pressed. Value:", event.target.value);
+                sendMessage();
+                event.target.value = ""; //CLEAR KAREGA INPUT
+            }
+        });
+    }
+    
+    const sendButton = document.getElementById("send-button");
+    if (sendButton) {
+        sendButton.addEventListener("click", () => {
+            if (chatInput) {
+                sendMessage();
+            }
+        })
+    }
+
+    const getTodayCollectionId = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+
+
 });
 async function displayAttendance() {
     const attendanceList = document.getElementById('attendanceList').getElementsByTagName('tbody')[0];
@@ -250,4 +305,150 @@ async function displayAttendance() {
             row.insertCell(2).textContent = today.toLocaleDateString();
         }
         
+}
+function getTodayCollectionId() {
+    let now = new Date();
+    let year = now.getFullYear();
+    let month = String(now.getMonth() + 1).padStart(2, '0'); // Add leading zero if month is single-digit
+    let day = String(now.getDate()).padStart(2, '0'); // Add leading zero if day is single-digit
+
+    return `${year}-${month}-${day}`; // Format: YYYY-MM-DD
+}
+
+
+async function sendMessageToFirebase(message, sender) {
+    const collectionId = getTodayCollectionId(); // Get today's date as collection ID
+    const messageRef = collection(db, `group_chats/${collectionId}/messages`);
+    await addDoc(messageRef, {
+        message: message,
+        sender: sender,
+        time: serverTimestamp()
+    });
+}
+
+async function sendMessage() {
+    let inputField = document.getElementById('chat-input');
+    let message = inputField.value.trim();
+    const sender = "Tester";
+  
+    if (message) {
+        let now = new Date();
+        let currentDate = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });  
+        let time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false        });
+
+        let lastMessageDate = sessionStorage.getItem('lastMessageDate'); //stores the last msg data
+
+        // If the message date has changed, insert a date separator
+        if (lastMessageDate !== currentDate) {
+            let dateSeparator = document.createElement('div');
+            dateSeparator.classList.add('date-separator');
+            dateSeparator.innerHTML = `<p>${currentDate}</p>`;
+            document.querySelector('.chat-body').appendChild(dateSeparator);
+
+            // Update the session storage with the current date
+            sessionStorage.setItem('lastMessageDate', currentDate);
+        }
+
+      // User message
+      let messageContainer = document.createElement('div');
+      messageContainer.classList.add('message');
+      messageContainer.classList.add('user-msg');
+      messageContainer.innerHTML = `
+      <p>${message}</p>
+      <span class="message-time">${time}</span>`;
+
+      document.querySelector('.chat-body').appendChild(messageContainer);
+      await sendMessageToFirebase(message, sender); //Send msg to server  
+      inputField.value = ''; // Clear input field
+  
+      // Scroll to the bottom
+      scrollToBottom();
+  
+      // Simulate bot response
+      setTimeout(() => {
+        let botMessage = document.createElement('div');
+        botMessage.classList.add('message');
+        botMessage.classList.add('bot-msg');
+        botMessage.innerHTML = `<p>You are in Testing Phase, Everything is <strong> recorded </strong>.</p>`;
+        
+        document.querySelector('.chat-body').appendChild(botMessage);
+  
+        // Scroll to the bottom
+        scrollToBottom();
+      }, 1000); // Bot replies after 1 second
     }
+  }
+  
+
+  
+  // Function to scroll to the bottom of the chat body
+  function scrollToBottom() {
+    const chatBody = document.querySelector('.chat-body');
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+  
+  document.addEventListener('copy',function (event){
+    event.preventDefault();
+  
+    const textToCopy  =  'Her cheez copy nahi karna chahiye';
+    event.clipboardData.setData('text/plain',textToCopy);
+  });
+
+
+
+
+  
+
+// func to fectch display messages from Firebase
+async function fetchMessages() {
+    const collectionId = getTodayCollectionId(); // Get today's collection ID
+    const messagesRef = collection(db, `group_chats/${collectionId}/messages`); // Reference to the collection
+
+    // Fetching data from Firestore
+    const querySnapshot = await getDocs(messagesRef);
+    const messagesContainer = document.querySelector('.chat-body'); // The div where you want to display the messages
+
+    if (!messagesContainer) {
+        // console.log('Not is Index-2');
+        return; // Exit the function if .chat-body is not found
+    }
+
+    // Clear current messages before displaying new ones
+    messagesContainer.innerHTML = '';
+
+
+    const welcomeMessage = document.createElement('div');
+    welcomeMessage.classList.add('message', 'default-msg');
+    welcomeMessage.innerHTML = `
+        <p>Welcome to <strong>The Fake Group</strong> chat!</p>
+        <span class="message-time">00:00</span>
+        <p> Must Read our <a href="https://kunal-gupta-1107.github.io/Attendance/T&C.html">T&C.</a></p>
+    `;
+    messagesContainer.appendChild(welcomeMessage);
+
+
+    // Loop through the fetched messages and append them to the chat
+    querySnapshot.forEach((doc) => {
+        const messageData = doc.data();
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message');
+        messageElement.classList.add(messageData.sender === "Tester" ? 'user-msg' : 'bot-msg');
+        
+        // Format the message time
+        const time = new Date(messageData.time.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+
+        // Create HTML structure for the message
+        messageElement.innerHTML = `
+            <p>${messageData.message}</p>
+            <span class="message-time">${time}</span>
+        `;
+        
+        messagesContainer.appendChild(messageElement);
+    });
+
+    // Scroll to the bottom after loading messages
+    scrollToBottom();
+}
+
+// Call the fetchMessages function when the page loads
+window.addEventListener('load', fetchMessages);
