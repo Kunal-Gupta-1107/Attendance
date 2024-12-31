@@ -11,7 +11,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: url('wall1.jpg'); /* for a local image */
+    background-image: url('wall.jpg'); /* for a local image */
     background-size: cover;
     background-position: center;
 }
