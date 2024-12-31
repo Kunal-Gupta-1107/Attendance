@@ -427,26 +427,36 @@ async function fetchMessages() {
     messagesContainer.appendChild(welcomeMessage);
 
 
-    // Loop through the fetched messages and append them to the chat
+    let messagesArray = [];
+    
     querySnapshot.forEach((doc) => {
         const messageData = doc.data();
+        messagesArray.push({
+            message: messageData.message,
+            sender: messageData.sender,
+            time: new Date(messageData.time.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+        });
+    });
+
+    // Reverse the array so latest messages come last
+    messagesArray.reverse();
+
+    // Loop through the reversed messages array and append them to the chat
+    messagesArray.forEach((messageData) => {
         const messageElement = document.createElement('div');
         messageElement.classList.add('message');
         messageElement.classList.add(messageData.sender === "Tester" ? 'user-msg' : 'bot-msg');
         
-        // Format the message time
-        const time = new Date(messageData.time.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-
         // Create HTML structure for the message
         messageElement.innerHTML = `
             <p>${messageData.message}</p>
-            <span class="message-time">${time}</span>
+            <span class="message-time">${messageData.time}</span>
         `;
         
         messagesContainer.appendChild(messageElement);
     });
 
-    // Scroll to the bottom after loading messages
+    // Scroll to the bottom after loading all messages (including the welcome message and all Firestore messages)
     scrollToBottom();
 }
 
