@@ -36,6 +36,154 @@ body {
     backdrop-filter: blur(4px); /* Apply blur effect */
 }
 
+
+.chatbot-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    background-color: #ffffff; /* Choose any color */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 2);
+  }
+  
+  .chatbot-icon img {
+    width: 35px;
+    height: 35px;
+  }
+
+
+  .chat-section {
+    display: none;
+    flex-direction: column; /* Stack children vertically */
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 300px;
+    max-height: 400px;
+    background: whitesmoke; /* Professional blue-purple gradient */
+    background-size: 400% 400%; /* Makes the gradient more dynamic */
+    animation: gradientAnimation 6s ease infinite; /* Smooth animation */
+    border-radius: 10px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    overflow: hidden;
+  }
+  
+  .chat-header {
+    background-color: #b6b6b6; /* Chat header color */
+    padding: 8px;
+    color: white;
+    font-size: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .img-logo {
+    width: 30px;
+    height: 30px ;
+    z-index: 9999;
+  }
+  .chat-body {
+    padding: 10px;
+    flex-grow: 1;  /* Allow chat body to take available space */
+    overflow-y: auto;  /* Enable scrolling if content exceeds available space */
+    max-height: 300px;  /* Limit height of chat body */
+    margin-bottom: 10px; /* Add space at the bottom */
+    background: white; /* Same gradient as chat modal */
+    background-size: 400% 400%; /* Matching dynamic gradient */
+    animation: gradientAnimation 6s ease infinite; /* Matching gradient animation */
+  }
+  
+  .message {
+    margin-bottom: 10px;
+    
+  }
+
+  .default-msg p {
+    background-color: #f0f0f0;
+    padding: 8px;
+    border-radius: 25px;
+    max-width: 80%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+  }
+  .user-msg p {
+    background-color: #f0f0f0;
+    padding: 6px;
+    border-radius: 10px;
+    max-width: fit-content;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    text-align: right;
+    margin-left: auto;
+  }
+  .user-msg .message-time {
+    display: block;
+    text-align: right;
+    margin-left: auto;
+    font-size: 0.75em;
+    color: gray;
+    margin-top: 5px;
+  }
+  .message-time {
+    font-size: 12px;
+    color: #888;
+    margin-top: 4px;
+    align-self: flex-end; /* Align the time to the right */
+  }
+
+  /* Style for the date separator */
+.date-separator {
+  text-align: center;
+  margin: 10px 0;
+  font-size: 14px;
+  color: #888;
+}
+
+.date-separator p {
+  background-color: #f0f0f0;
+  padding: 6px 10px;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+
+  .chat-footer {
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    background: white; /* Same gradient as chat modal */
+    background-size: 400% 400%; /* Matching dynamic gradient */
+    animation: gradientAnimation 6s ease infinite; /* Matching gradient animation */  
+  }
+
+  .button-1 {
+    width: 25px; /* Set specific width */
+    height: 25px;
+    padding: 2px; /* Custom padding for this button */
+    margin-bottom: 5px;
+  }
+  .button-2 {
+    width: 50px; /* Set specific width */
+    padding: 2px; /* Custom padding for this button */
+    margin-bottom: 5px;
+  }
+
+  #chat-input {
+    width: 75%;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #271a1a;
+    margin-bottom: 5px; 
+    /* Botton ka bhi */
+  }
+
+
 /* spinnner */
 /* Spinner Container */
 .spinner-container {
