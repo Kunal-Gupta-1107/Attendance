@@ -1,6 +1,6 @@
 {
-  "short_name": "Attendance",
-  "name": "Attendance Tracker",
+  "short_name": "MarkMates",
+  "name": "MarkMates",
   "icons": [
     {
       "src": "icon.png",
@@ -12,5 +12,5 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
-  "version": "2.1"
+  "version": "4.0"
 }
