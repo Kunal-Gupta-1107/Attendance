@@ -10,7 +10,7 @@
   ],
   "start_url": "/Attendance/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#0333C3",
   "theme_color": "#000000",
   "version": "4.0"
 }
