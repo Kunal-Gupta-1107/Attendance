@@ -167,6 +167,7 @@ body {
     height: 25px;
     padding: 2px; /* Custom padding for this button */
     margin-bottom: 5px;
+    background-color: #ff1100;
   }
   .button-2 {
     width: 50px; /* Set specific width */
