@@ -423,6 +423,7 @@ async function fetchMessages() {
         <p>Welcome to <strong>The Fake Group</strong> chat!</p>
         <span class="message-time">00:00</span>
         <p> Must Read our <a href="https://kunal-gupta-1107.github.io/Attendance/T&C.html">T&C.</a></p>
+        <p> Be part of our survey: <a href="https://forms.gle/2N1T2HvWHU9J9fW96">https://forms.gle/2N1T2HvWHU9J9fW96</a>.</p>
     `;
     messagesContainer.appendChild(welcomeMessage);
 
