@@ -1,14 +1,14 @@
 const CACHE_NAME = 'attendance-app-cache-v2.1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/index2.html',
-  '/styles.css',
-  '/script.js',
-  '/icon.png',
-  '/wall.jpg',
-  '/madePng.png',
-  '/offline.html'
+  '/Attendance/',         
+  '/Attendance/index.html',
+  '/Attendance/index2.html',
+  '/Attendance/styles.css',
+  '/Attendance/script.js',
+  '/Attendance/icon.png',
+  '/Attendance/wall.jpg',
+  '/Attendance/madePng.png',
+  '/Attendance/offline.html'
 ];
 
 // Install event: Cache important resources
