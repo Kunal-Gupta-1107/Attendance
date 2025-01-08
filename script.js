@@ -1,6 +1,6 @@
 if ('serviceWorker' in navigator) {
     // Register the Service Worker
-    navigator.serviceWorker.register('/service-worker.js') // Path to your service worker file
+    navigator.serviceWorker.register('/Attendance/service-worker.js') // Path to your service worker file
         .then((registration) => {
             console.log('Service Worker registered with scope:', registration.scope);
         })
