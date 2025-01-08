@@ -222,31 +222,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const chatInput = document.getElementById("chat-input");
 
-if (chatInput) {
-    let notificationSent = false; //flaging for once
+    if (chatInput) {
+        let notificationSent = false; //flaging for once
 
-    chatInput.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-            if (!notificationSent) {
-                Notification.requestPermission().then(perm => {
-                    if (perm === "granted") {
-                        // Show notification
-                        new Notification("I Welcome you 😊!", {
-                            body: "Thanks for enabling me.😊"
-                        });
-    
-                        notificationSent = true;
-                        alert("Notification aaya kya ?");
-                    } else {
-                        alert("Notification permission denied!");
-                    }
-                });
-            }   
-            sendMessage();
-            event.target.value = ""; //CLEAR KAREGA INPUT
-        }
-    });
-}
+        chatInput.addEventListener("keydown", (event) => {
+            if (event.key === "Enter") {
+                if (!notificationSent) {
+                    Notification.requestPermission().then(perm => {
+                        if (perm === "granted") {
+                            navigator.serviceWorker.ready.then(registration => {
+                                registration.showNotification("I Welcome you 😊!", {
+                                    body: "Thanks for enabling me.😊",
+                                    icon: "/icon.png", // Optional: Add your notification icon
+                                    vibrate: [200, 100, 200] // Optional: Vibration pattern
+                                });
+                            });
+                            
+                            notificationSent = true;
+                        } else {
+                            alert("Notification permission denied!");
+                        }
+                    });
+                }   
+                sendMessage();
+                event.target.value = ""; //CLEAR KAREGA INPUT
+            }
+        });
+    }
 
     
     const sendButton = document.getElementById("send-button");
@@ -257,9 +259,12 @@ if (chatInput) {
             if (!notificationSent) {
                 Notification.requestPermission().then(perm => {
                     if (perm === "granted") {
-                        // Show notification
-                        new Notification("I Welcome you 😊!", {
-                            body: "Thanks for enabling me.😊"
+                        navigator.serviceWorker.ready.then(registration => {
+                            registration.showNotification("I Welcome you 😊!", {
+                                body: "Thanks for enabling me.😊",
+                                icon: "/icon.png",
+                                vibrate: [200, 100, 200]
+                            });
                         });
 
                         notificationSent = true;
