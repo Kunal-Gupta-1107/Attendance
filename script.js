@@ -1,15 +1,40 @@
 if ('serviceWorker' in navigator) {
-    // Register the Service Worker
-    navigator.serviceWorker.register('/Attendance/service-worker.js') 
-        .then((registration) => {
-            console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch((error) => {
-            console.error('Service Worker registration failed:', error);
-        });
-} else {
-    console.log('Service Workers are not supported in this browser.');
+    navigator.serviceWorker.register('/service-worker.js').then((registration) => {
+        console.log('Service Worker registered with scope:', registration.scope);
+
+        // Listen for updates to the service worker
+        registration.onupdatefound = () => {
+            const newWorker = registration.installing;
+
+            newWorker.onstatechange = () => {
+                if (newWorker.state === 'installed') {
+                    // If there's a new service worker and the page is still using the old one
+                    if (navigator.serviceWorker.controller) {
+                        // Notify user about the new version
+                        showUpdateNotification();
+                    }
+                }
+            };
+        };
+    }).catch((error) => {
+        console.error('Service Worker registration failed:', error);
+    });
 }
+
+
+
+// if ('serviceWorker' in navigator) {
+//     // Register the Service Worker
+//     navigator.serviceWorker.register('/Attendance/service-worker.js') 
+//         .then((registration) => {
+//             console.log('Service Worker registered with scope:', registration.scope);
+//         })
+//         .catch((error) => {
+//             console.error('Service Worker registration failed:', error);
+//         });
+// } else {
+//     console.log('Service Workers are not supported in this browser.');
+// }
 
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
@@ -516,3 +541,28 @@ async function fetchMessages() {
 
 // Call the fetchMessages function when the page loads
 window.addEventListener('load', fetchMessages);
+
+
+function showUpdateNotification() {
+    const updateDiv = document.createElement('div');
+    updateDiv.innerText = 'A new version is available. Click to update!';
+    updateDiv.style.position = 'fixed';
+    updateDiv.style.bottom = '20px';
+    updateDiv.style.left = '50%';
+    updateDiv.style.transform = 'translateX(-50%)';
+    updateDiv.style.background = '#007bff';
+    updateDiv.style.color = 'white';
+    updateDiv.style.padding = '10px 20px';
+    updateDiv.style.borderRadius = '5px';
+    updateDiv.style.cursor = 'pointer';
+    updateDiv.style.zIndex = '9999';
+    document.body.appendChild(updateDiv);
+
+    // On click, reload the page to activate the new service worker
+    updateDiv.addEventListener('click', () => {
+        if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ action: 'skipWaiting' });
+        }
+        window.location.reload();
+    });
+}
