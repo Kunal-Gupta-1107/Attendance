@@ -1,4 +1,4 @@
-const CACHE_NAME = 'attendance-app-cache-v2.1';
+const CACHE_NAME = 'markmates-cache-v4';
 const urlsToCache = [
   '/Attendance/',         
   '/Attendance/index.html',
