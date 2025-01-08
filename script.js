@@ -234,8 +234,9 @@ if (chatInput) {
                         new Notification("I Welcome you 😊!", {
                             body: "Thanks for enabling me.😊"
                         });
-
+    
                         notificationSent = true;
+                        alert("Notification aaya kya ?");
                     } else {
                         alert("Notification permission denied!");
                     }
