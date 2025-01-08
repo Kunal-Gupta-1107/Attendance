@@ -1,8 +1,6 @@
 {
   "short_name": "MarkMates",
   "name": "MarkMates",
-  "version": "4",
-  "start_url": "/index.html",
   "icons": [
     {
       "src": "icon.png",
