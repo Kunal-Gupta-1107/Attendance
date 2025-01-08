@@ -4,10 +4,10 @@ const urlsToCache = [
   '/index.html',
   '/index2.html',
   '/styles.css',
-  '/scripts.js',
+  '/script.js',
   '/icon.png',
   '/wall.jpg',
-  '/madepng.png',
+  '/madePng.png',
   '/offline.html'
 ];
 
@@ -65,10 +65,10 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   console.log('Notification clicked:', event.notification);
-  event.notification.close(); // Close the notification
+  event.notification.close();
 
-  // Open a specific page when the notification is clicked
   event.waitUntil(
-      clients.openWindow('https://kunal-gupta-1107.github.io/Attendance/') // Replace with your desired URL
+      clients.openWindow('https://kunal-gupta-1107.github.io/Attendance/')
+      .catch(err => console.error('Failed to open window:', err))
   );
 });
