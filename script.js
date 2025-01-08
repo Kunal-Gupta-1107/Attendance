@@ -420,7 +420,7 @@ async function fetchMessages() {
     const welcomeMessage = document.createElement('div');
     welcomeMessage.classList.add('message', 'default-msg');
     welcomeMessage.innerHTML = `
-        <p>Welcome to <strong>The Fake Group</strong> chat!</p>
+        <p>Welcome to <strong>Miracle Mind Group</strong> chat!</p>
         <span class="message-time">00:00</span>
         <p> Must Read our <a href="https://kunal-gupta-1107.github.io/Attendance/T&C.html">T&C.</a></p>
         <span class="message-time">00:00</span>
