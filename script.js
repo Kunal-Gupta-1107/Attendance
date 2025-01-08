@@ -221,21 +221,55 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     const chatInput = document.getElementById("chat-input");
-    if (chatInput) {
-        chatInput.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
-                // console.log("Enter pressed. Value:", event.target.value);
-                sendMessage();
-                event.target.value = ""; //CLEAR KAREGA INPUT
-            }
-        });
-    }
+
+if (chatInput) {
+    let notificationSent = false; //flaging for once
+
+    chatInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            if (!notificationSent) {
+                Notification.requestPermission().then(perm => {
+                    if (perm === "granted") {
+                        // Show notification
+                        new Notification("I Welcome you 😊!", {
+                            body: "Thanks for enabling me.😊"
+                        });
+
+                        notificationSent = true;
+                    } else {
+                        alert("Notification permission denied!");
+                    }
+                });
+            }   
+            sendMessage();
+            event.target.value = ""; //CLEAR KAREGA INPUT
+        }
+    });
+}
+
     
     const sendButton = document.getElementById("send-button");
     if (sendButton) {
+        let notificationSent = false;
         sendButton.addEventListener("click", () => {
+            //Noti...
+            if (!notificationSent) {
+                Notification.requestPermission().then(perm => {
+                    if (perm === "granted") {
+                        // Show notification
+                        new Notification("I Welcome you 😊!", {
+                            body: "Thanks for enabling me.😊"
+                        });
+
+                        notificationSent = true;
+                    } else {
+                        alert("Notification permission denied!");
+                    }
+                });
+            }
             if (chatInput) {
                 sendMessage();
+                chatInput.value = ""; //CLEAR KAREGA INPUT
             }
         })
     }
