@@ -241,9 +241,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     Notification.requestPermission().then(perm => {
                         if (perm === "granted") {
                             navigator.serviceWorker.ready.then(registration => {
-                                registration.showNotification("I Welcome you 😊!", {
+                                registration.showNotification("I Welcome you!", {
                                     body: "Thanks for enabling me.😊",
-                                    icon: "/Attendance/icon.png", 
+                                    icon: "https://kunal-gupta-1107.github.io/Attendance/icon.png",
+                                    badge: "https://kunal-gupta-1107.github.io/Attendance/icon.png",
                                     vibrate: [200, 100, 200] 
                                 });
                             });
@@ -270,9 +271,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 Notification.requestPermission().then(perm => {
                     if (perm === "granted") {
                         navigator.serviceWorker.ready.then(registration => {
-                            registration.showNotification("I Welcome you 😊!", {
+                            registration.showNotification("I Welcome you!", {
                                 body: "Thanks for enabling me.😊",
-                                icon: "/icon.png",
+                                icon: "https://kunal-gupta-1107.github.io/Attendance/icon.png",
+                                badge: "https://kunal-gupta-1107.github.io/Attendance/icon.png",
                                 vibrate: [200, 100, 200]    
                                 
                             });
