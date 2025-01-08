@@ -62,3 +62,13 @@ self.addEventListener('activate', (event) => {
   );
   self.clients.claim(); // Immediately take control of open pages
 });
+
+self.addEventListener('notificationclick', (event) => {
+  console.log('Notification clicked:', event.notification);
+  event.notification.close(); // Close the notification
+
+  // Open a specific page when the notification is clicked
+  event.waitUntil(
+      clients.openWindow('https://kunal-gupta-1107.github.io/Attendance/') // Replace with your desired URL
+  );
+});
