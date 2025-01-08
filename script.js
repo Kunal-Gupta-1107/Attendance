@@ -1,3 +1,17 @@
+if ('serviceWorker' in navigator) {
+    // Register the Service Worker
+    navigator.serviceWorker.register('/service-worker.js') // Path to your service worker file
+        .then((registration) => {
+            console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch((error) => {
+            console.error('Service Worker registration failed:', error);
+        });
+} else {
+    console.log('Service Workers are not supported in this browser.');
+}
+
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
@@ -237,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     vibrate: [200, 100, 200] // Optional: Vibration pattern
                                 });
                             });
-                            
+                            console.log("msg sd ent");
                             notificationSent = true;
                         } else {
                             alert("Notification permission denied!");
@@ -263,8 +277,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             registration.showNotification("I Welcome you 😊!", {
                                 body: "Thanks for enabling me.😊",
                                 icon: "/icon.png",
-                                vibrate: [200, 100, 200]
+                                // vibrate: [200, 100, 200]    
+                                
                             });
+                            console.log("msg sd by bt");
                         });
 
                         notificationSent = true;
