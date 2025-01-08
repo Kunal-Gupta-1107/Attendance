@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             registration.showNotification("I Welcome you 😊!", {
                                 body: "Thanks for enabling me.😊",
                                 icon: "/icon.png",
-                                // vibrate: [200, 100, 200]    
+                                vibrate: [200, 100, 200]    
                                 
                             });
                             console.log("msg sd by bt");
