@@ -41,7 +41,7 @@ self.addEventListener('fetch', (event) => {
       });
     }).catch(() => {
       // If both cache and network fail, show an offline fallback
-      return caches.match('/offline.html');
+      return caches.match('/Attendance/offline.html');
     })
   );
 });
@@ -61,6 +61,13 @@ self.addEventListener('activate', (event) => {
     })
   );
   self.clients.claim(); // Immediately take control of open pages
+  // Notify users if a new version of the app is available
+  self.registration.showNotification("New version available!", {
+    body: "A new version of the app has been installed. Refresh to get the latest features.",
+    icon: '/Attendance/icon.png',
+    vibrate: [200, 100, 200],
+  });
+
 });
 
 self.addEventListener('notificationclick', (event) => {
@@ -68,7 +75,14 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   event.waitUntil(
-      clients.openWindow('https://kunal-gupta-1107.github.io/Attendance/')
-      .catch(err => console.error('Failed to open window:', err))
+    clients.matchAll({ type: 'window' }).then((clientList) => {
+      // If already open, focus it, otherwise open a new one
+      let openWindow = clientList.find(client => client.url === 'https://kunal-gupta-1107.github.io/Attendance/' && 'focus' in client);
+      if (openWindow) {
+        openWindow.focus();
+      } else {
+        clients.openWindow('https://kunal-gupta-1107.github.io/Attendance/'); // ye agar window not found
+      }
+    }).catch(err => console.error('Failed to open window:', err))
   );
 });
