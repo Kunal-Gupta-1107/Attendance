@@ -1,6 +1,6 @@
 if ('serviceWorker' in navigator) {
     // Register the Service Worker
-    navigator.serviceWorker.register('/Attendance/service-worker.js') // Path to your service worker file
+    navigator.serviceWorker.register('/Attendance/service-worker.js') 
         .then((registration) => {
             console.log('Service Worker registered with scope:', registration.scope);
         })
@@ -59,10 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModal = document.getElementById('closeModal');
     let deferredPrompt;
     const seeFriendsButton = document.getElementById('seeFriendsButton');
-    // Chatbox functionality
-    
-    
-    
     const timeButton = document.getElementById('time-btn');
 
     if (seeFriendsButton) {
@@ -82,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
    
 
-    const targetLocation = { lat: 27.1862, lon: 78.0031 }; // Change to your target latitude and longitude
+    const targetLocation = { lat: 27.1862, lon: 78.0031 }; 
     const radius = 100; // Distance in meters
 
     function getDistance(lat1, lon1, lat2, lon2) {
@@ -247,8 +243,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             navigator.serviceWorker.ready.then(registration => {
                                 registration.showNotification("I Welcome you 😊!", {
                                     body: "Thanks for enabling me.😊",
-                                    icon: "/icon.png", // Optional: Add your notification icon
-                                    vibrate: [200, 100, 200] // Optional: Vibration pattern
+                                    icon: "/Attendance/icon.png", 
+                                    vibrate: [200, 100, 200] 
                                 });
                             });
                             console.log("msg sd ent");
@@ -394,7 +390,7 @@ async function sendMessage() {
 
         let lastMessageDate = sessionStorage.getItem('lastMessageDate'); //stores the last msg data
 
-        // If the message date has changed, insert a date separator
+        // If the message date has changed, insertING a date separator
         if (lastMessageDate !== currentDate) {
             let dateSeparator = document.createElement('div');
             dateSeparator.classList.add('date-separator');
