@@ -259,7 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     vibrate: [200, 100, 200] 
                                 });
                             });
-                            console.log("msg sd ent");
+                            // console.log("msg sd ent");
                             notificationSent = true;
                         } else {
                             alert("Notification permission denied!");
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 badge: "/Attendance/badge.png",
                                 vibrate: [200, 100, 200]     
                             });
-                            console.log("msg sd by bt");
+                            // console.log("msg sd by bt");
                         });
 
                         notificationSent = true;
