@@ -1,4 +1,4 @@
-const CACHE_NAME = 'markmates-cache-v4';
+const CACHE_NAME = 'markmates-cache-v4.1';
 const urlsToCache = [
   '/Attendance/',         
   '/Attendance/index.html',
@@ -6,6 +6,7 @@ const urlsToCache = [
   '/Attendance/styles.css',
   '/Attendance/script.js',
   '/Attendance/icon.png',
+  '/Attendance/badge.png',
   '/Attendance/wall.jpg',
   '/Attendance/madePng.png',
   '/Attendance/offline.html'
@@ -65,6 +66,7 @@ self.addEventListener('activate', (event) => {
   self.registration.showNotification("New version available!", {
     body: "A new version of the app has been installed. Refresh to get the latest features.",
     icon: '/Attendance/icon.png',
+    badge: "/Attendance/badge.png",
     vibrate: [200, 100, 200],
   });
 
