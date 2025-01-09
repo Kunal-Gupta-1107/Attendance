@@ -454,7 +454,7 @@ async function sendMessage() {
   document.addEventListener('copy',function (event){
     event.preventDefault();
   
-    const textToCopy  =  'Her cheez copy nahi karna chahiye';
+    const textToCopy  =  'Try to Write, Not to Copy Buddy!';
     event.clipboardData.setData('text/plain',textToCopy);
   });
 
