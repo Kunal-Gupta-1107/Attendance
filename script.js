@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let notificationSent = false; //flaging for once
 
         chatInput.addEventListener("keydown", (event) => {
-            if (event.key === "Enter") {
+            if (event.key === "Enter" && chatInput.value.trim() !== "") {
                 if (!notificationSent) {
                     Notification.requestPermission().then(perm => {
                         if (perm === "granted") {
@@ -300,8 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 body: "Thanks for enabling me.😊",
                                 icon: "https://kunal-gupta-1107.github.io/Attendance/icon.png",
                                 badge: "/Attendance/badge.png",
-                                vibrate: [200, 100, 200]    
-                                
+                                vibrate: [200, 100, 200]     
                             });
                             console.log("msg sd by bt");
                         });
@@ -312,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
-            if (chatInput) {
+            if (chatInput && chatInput.value.trim() !== "") {
                 sendMessage();
                 chatInput.value = ""; //CLEAR KAREGA INPUT
             }
