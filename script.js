@@ -23,20 +23,6 @@ if ('serviceWorker' in navigator) {
 
 
 
-// if ('serviceWorker' in navigator) {
-//     // Register the Service Worker
-//     navigator.serviceWorker.register('/Attendance/service-worker.js') 
-//         .then((registration) => {
-//             console.log('Service Worker registered with scope:', registration.scope);
-//         })
-//         .catch((error) => {
-//             console.error('Service Worker registration failed:', error);
-//         });
-// } else {
-//     console.log('Service Workers are not supported in this browser.');
-// }
-
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
@@ -498,7 +484,7 @@ async function fetchMessages() {
     const welcomeMessage = document.createElement('div');
     welcomeMessage.classList.add('message', 'default-msg');
     welcomeMessage.innerHTML = `
-        <p>Welcome to <strong>Miracle Mind Group</strong> chat!</p>
+        <p>Welcome to <strong>MarkMates Group</strong> chat!</p>
         <span class="message-time">00:00</span>
         <p> Must Read our <a href="https://kunal-gupta-1107.github.io/Attendance/T&C.html">T&C.</a></p>
         <span class="message-time">00:00</span>
