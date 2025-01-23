@@ -26,14 +26,32 @@ if ('serviceWorker' in navigator) {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-fetch("/api/getAttendance")
-  .then(response => response.json())
-  .then(config => {
-      const app = initializeApp(config);
-      const db = getFirestore(app);
-      console.log("Firebase Initialized Securely");
-  })
-  .catch(error => console.error("Error fetching Firebase config:", error));
+const initializeFirebase = async () => {
+    try {
+        const response = await fetch("/api/firebaseConfig"); // Fetch Firebase config
+        if (!response.ok) throw new Error("Failed to fetch Firebase config");
+
+        const config = await response.json();
+        const app = initializeApp(config);
+        db = getFirestore(app); // Assign db after successful initialization
+
+        console.log("🔥 Firebase Initialized Securely");
+
+        // Now call functions that require `db`
+        fetchMessages(); // Ensure this runs only after Firebase is ready
+    } catch (error) {
+        console.error("❌ Firebase Initialization Error:", error);
+    }
+};
+
+// Call initialization function
+
+
+
+
+const app = initializeFirebase();
+const db = getFirestore(app);
+
 
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 // Function to retrieve the attendance code from Firestore
