@@ -1,14 +1,10 @@
-export default async function handler(req, res) {
-    const apiKey = process.env.API_KEY;  // Securely get the API key
-
-    try {
-        const response = await fetch(`https://your-api.com/data`, {
-            headers: { Authorization: `Bearer ${apiKey}` }
-        });
-
-        const data = await response.json();
-        res.status(200).json(data);
-    } catch (error) {
-        res.status(500).json({ error: "Failed to fetch attendance data" });
-    }
+export default function handler(req, res) {
+    res.status(200).json({
+        apiKey: process.env.FIREBASE_API_KEY,
+        authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+        messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+        appId: process.env.FIREBASE_APP_ID
+    });
 }
