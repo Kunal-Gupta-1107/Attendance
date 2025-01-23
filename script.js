@@ -26,18 +26,14 @@ if ('serviceWorker' in navigator) {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBFJrziRByYb0EwC2sYfP_cLtiQJlS02cY",
-    authDomain: "attendance-38541.firebaseapp.com",
-    projectId: "attendance-38541",
-    storageBucket: "attendance-38541.appspot.com",
-    messagingSenderId: "439358946279",
-    appId: "1:439358946279:web:fe466a68db5e8ad77f1b42"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
+fetch("/api/firebaseConfig")
+  .then(response => response.json())
+  .then(config => {
+      const app = initializeApp(config);
+      const db = getFirestore(app);
+      console.log("Firebase Initialized Securely");
+  })
+  .catch(error => console.error("Error fetching Firebase config:", error));
 
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 // Function to retrieve the attendance code from Firestore
