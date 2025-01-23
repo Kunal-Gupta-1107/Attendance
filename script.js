@@ -26,7 +26,7 @@ if ('serviceWorker' in navigator) {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
-fetch("/api/firebaseConfig")
+fetch("/api/getAttendance")
   .then(response => response.json())
   .then(config => {
       const app = initializeApp(config);
