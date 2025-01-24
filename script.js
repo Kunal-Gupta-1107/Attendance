@@ -26,6 +26,10 @@ if ('serviceWorker' in navigator) {
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
+
+let db;
+
+// Function to initialize Firebase securely
 const initializeFirebase = async () => {
     try {
         const response = await fetch("/api/firebaseConfig"); // Fetch Firebase config
@@ -45,12 +49,12 @@ const initializeFirebase = async () => {
 };
 
 // Call initialization function
-
+//initializeFirebase();
 
 
 
 const app = initializeFirebase();
-const db = getFirestore(app);
+//const db = getFirestore(app);
 
 
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
