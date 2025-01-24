@@ -483,6 +483,10 @@ async function sendMessage() {
 
 // func to fectch display messages from Firebase
 async function fetchMessages() {
+    if (!db) {
+        console.error("❌ Firestore is not initialized yet!");
+        return;
+    }
     const collectionId = getTodayCollectionId(); // Get today's collection ID
     const messagesRef = collection(db, `group_chats/${collectionId}/messages`); // Reference to the collection
 
