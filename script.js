@@ -42,7 +42,7 @@ const initializeFirebase = async () => {
         console.log("🔥 Firebase Initialized Securely");
 
         // Now call functions that require `db`
-        fetchMessages(); // Ensure this runs only after Firebase is ready
+       // fetchMessages(); // Ensure this runs only after Firebase is ready
     } catch (error) {
         console.error("❌ Firebase Initialization Error:", error);
     }
