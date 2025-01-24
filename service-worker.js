@@ -1,15 +1,15 @@
 const CACHE_NAME = 'markmates-cache-v4.1';
 const urlsToCache = [
   '/Attendance/',         
-  '/Attendance/index.html',
-  '/Attendance/index2.html',
-  '/Attendance/styles.css',
-  '/Attendance/script.js',
-  '/Attendance/icon.png',
-  '/Attendance/badge.png',
-  '/Attendance/wall.jpg',
-  '/Attendance/madePng.png',
-  '/Attendance/offline.html'
+  '/index.html',
+  '/index2.html',
+  '/styles.css',
+  '/script.js',
+  '/icon.png',
+  '/badge.png',
+  '/wall.jpg',
+  '/madePng.png',
+  '/offline.html'
 ];
 
 // Install event: Cache important resources
