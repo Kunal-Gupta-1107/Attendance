@@ -489,6 +489,7 @@ async function fetchMessages() {
     }
     const collectionId = getTodayCollectionId(); // Get today's collection ID
     const messagesRef = collection(db, `group_chats/${collectionId}/messages`); // Reference to the collection
+    console.log("📂 Firestore Collection Reference Created:", messagesRef);
 
     // Fetching data from Firestore
     const querySnapshot = await getDocs(messagesRef);
