@@ -1,6 +1,6 @@
 const CACHE_NAME = 'markmates-cache-v4.1';
 const urlsToCache = [
-  '/Attendance/',         
+  '/',         
   '/index.html',
   '/index2.html',
   '/styles.css',
