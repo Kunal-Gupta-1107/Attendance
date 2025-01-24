@@ -1,5 +1,5 @@
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/Attendance/service-worker.js').then((registration) => {
+    navigator.serviceWorker.register('https://attendance-lemon.vercel.app/Attendance/service-worker.js').then((registration) => {
         console.log('Service Worker registered with scope:', registration.scope);
 
         // Listen for updates to the service worker
