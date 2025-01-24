@@ -18,6 +18,9 @@ const db = getFirestore(app); // Get Firestore reference
 
 // API route to handle adding attendance to Firestore
 export default async function handler(req, res) {
+  if (!process.env.FIREBASE_API_KEY) {
+        return res.status(500).json({ error: "Firebase API key is missing!" });
+    }
   if (req.method === 'POST') {
     try {
       const { name, attendanceCode, timestamp, date } = req.body;
@@ -29,7 +32,7 @@ export default async function handler(req, res) {
         timestamp: timestamp || serverTimestamp(),
         date: date,
       });
-
+  
       // Respond with success
       res.status(200).json({ success: true, id: docRef.id });
     } catch (error) {
