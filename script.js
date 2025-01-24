@@ -32,7 +32,7 @@ let db;
 // Function to initialize Firebase securely
 const initializeFirebase = async () => {
     try {
-        const response = await fetch("/api/firebaseConfig"); // Fetch Firebase config
+        const response = await fetch("/api/getAttendance"); // Fetch Firebase config
         if (!response.ok) throw new Error("Failed to fetch Firebase config");
 
         const config = await response.json();
