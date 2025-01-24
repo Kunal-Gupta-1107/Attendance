@@ -1,33 +1,15 @@
-import firebaseAdmin from 'firebase-admin';
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
 
-// Initialize Firebase Admin SDK
-if (!firebaseAdmin.apps.length) {
-  firebaseAdmin.initializeApp({
-    credential: firebaseAdmin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),  // Make sure newlines in private key are handled correctly
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    }),
-  });
-}
+// You can call this directly on the frontend (it won't expose the keys since you're not sending them over HTTP)
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
+};
 
-export default async function handler(req, res) {
-  try {
-    // Example of accessing Firestore or another Firebase service
-    const db = firebaseAdmin.firestore();
-    const attendanceRef = db.collection('attendance');
-    const snapshot = await attendanceRef.get();
-
-    if (snapshot.empty) {
-      res.status(404).json({ message: 'No attendance records found.' });
-      return;
-    }
-
-    const attendanceData = snapshot.docs.map(doc => doc.data());
-    res.status(200).json({ message: 'Successfully retrieved attendance data.', data: attendanceData });
-
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    res.status(500).json({ message: 'An error occurred while fetching data.' });
-  }
-}
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
