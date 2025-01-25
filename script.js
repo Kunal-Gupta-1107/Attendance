@@ -152,10 +152,28 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
     async function checkDuplicate(name, date) {
-        const attendanceQuery = query(collection(db, "attendance"), where("name", "==", name), where("date", "==", date));
-        const querySnapshot = await getDocs(attendanceQuery);
-        return !querySnapshot.empty;
+    try {
+        const response = await fetch('/api/checkDuplicate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, date })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            return result.exists; // returns true if a duplicate exists
+        } else {
+            console.error("❌ Error checking for duplicates:", result.error);
+            return false;
+        }
+    } catch (error) {
+        console.error("❌ Network error:", error);
+        return false;
     }
+}
+
 
     async function addAttendance(name, attendanceCode) {
         try {
