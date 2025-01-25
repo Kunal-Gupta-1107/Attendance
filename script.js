@@ -407,8 +407,8 @@ async function displayAttendance() {
     } catch (error) {
         console.error("Error fetching attendance:", error);
         const row = attendanceList.insertRow();
-        row.insertCell(0).textContent = "Error";
-        row.insertCell(1).textContent = "Failed to load data";
+        row.insertCell(0).textContent = "😵Something bad happened";
+        row.insertCell(1).textContent = "🔒Security Increase";
         row.insertCell(2).textContent = new Date().toLocaleDateString();
     }
 }
