@@ -29,35 +29,35 @@ import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, wher
 
 let db;
 
-// Function to initialize Firebase securely
-const initializeFirebase = async () => {
-    try {
-        const response = await fetch("/api/getAttendance"); // Fetch Firebase config
-        if (!response.ok) throw new Error("Failed to fetch Firebase config");
+// // Function to initialize Firebase securely
+// const initializeFirebase = async () => {
+//     try {
+//         const response = await fetch("/api/getAttendance"); // Fetch Firebase config
+//         if (!response.ok) throw new Error("Failed to fetch Firebase config");
 
-        const config = await response.json();
-        // Ensure the config is valid before using it
-        if (!config.apiKey || !config.projectId) {
-            throw new Error("Invalid Firebase Config Received");
-        }
-        const app = initializeApp(config);
-        db = getFirestore(app); // Assign db after successful initialization
+//         const config = await response.json();
+//         // Ensure the config is valid before using it
+//         if (!config.apiKey || !config.projectId) {
+//             throw new Error("Invalid Firebase Config Received");
+//         }
+//         const app = initializeApp(config);
+//         db = getFirestore(app); // Assign db after successful initialization
 
-        console.log("🔥 Firebase Initialized Securely");
+//         console.log("🔥 Firebase Initialized Securely");
 
-        // Now call functions that require `db`
-       // fetchMessages(); // Ensure this runs only after Firebase is ready
-    } catch (error) {
-        console.error("❌ Firebase Initialization Error:", error);
-    }
-};
+//         // Now call functions that require `db`
+//        // fetchMessages(); // Ensure this runs only after Firebase is ready
+//     } catch (error) {
+//         console.error("❌ Firebase Initialization Error:", error);
+//     }
+// };
 
 // Call initialization function
 //initializeFirebase();
 
 
 
-const app = initializeFirebase();
+// const app = initializeFirebase();
 //const db = getFirestore(app);
 
 
