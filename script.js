@@ -343,8 +343,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         navigator.serviceWorker.ready.then(registration => {
                             registration.showNotification("I Welcome you!", {
                                 body: "Thanks for enabling me.😊",
-                                icon: "https://kunal-gupta-1107.github.io/Attendance/icon.png",
-                                badge: "/Attendance/badge.png",
+                                icon: "https://attendance-lemon.vercel.app/icon.png",
+                                badge: "https://attendance-lemon.vercel.app/badge.png",
                                 vibrate: [200, 100, 200]     
                             });
                             // console.log("msg sd by bt");
@@ -544,7 +544,7 @@ async function fetchMessages() {
             welcomeMessage.innerHTML = `
                 <p>Welcome to <strong>MarkMates Group</strong> chat!</p>
                 <span class="message-time">00:00</span>
-                <p> Must Read our <a href="https://kunal-gupta-1107.github.io/Attendance/T&C.html">T&C.</a></p>
+                <p> Must Read our <a href="https://attendance-lemon.vercel.app/T&C.html">T&C.</a></p>
                 <span class="message-time">00:00</span>
                 <p> Be part of our survey: <a href="https://forms.gle/2N1T2HvWHU9J9fW96">Let's go</a>.</p>
             `;
