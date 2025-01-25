@@ -65,8 +65,8 @@ self.addEventListener('activate', (event) => {
   // Notify users if a new version of the app is available
   self.registration.showNotification("New version available!", {
     body: "A new version of the app has been installed. Refresh to get the latest features.",
-    icon: '/Attendance/icon.png',
-    badge: "/Attendance/badge.png",
+    icon: 'https://attendance-lemon.vercel.app/icon.png',
+    badge: "https://attendance-lemon.vercel.app/badge.png",
     vibrate: [200, 100, 200],
   });
 
