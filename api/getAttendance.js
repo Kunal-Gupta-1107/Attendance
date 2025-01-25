@@ -42,30 +42,32 @@ export default async function handler(req, res) {
 
     // Default case: Fetch attendance records
     try {
-        console.log("🔥 Fetching attendance data...");
+    const today = new Date().toISOString().split('T')[0];
+    console.log("🔥 Fetching attendance data for today...");
 
-        const querySnapshot = await getDocs(collection(db, "attendance"));
-        if (querySnapshot.empty) {
-            console.warn("⚠ No attendance records found.");
-            return res.status(200).json({ attendance: [] });
-        }
+    const q = query(collection(db, "attendance"), where("date", "==", today));
+    const querySnapshot = await getDocs(q);
 
-        const attendanceRecords = [];
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            attendanceRecords.push({
-                name: data.name || "Unknown",
-                code: "Hidden", // Keep the code hidden for security
-                date: data.date || new Date().toISOString(),
-                timestamp: data.timestamp ? data.timestamp.toMillis() : 0
-            });
-        });
-
-        console.log("✅ Successfully fetched attendance data.");
-        res.status(200).json({ attendance: attendanceRecords });
-
-    } catch (error) {
-        console.error("🔥 API ERROR:", error);
-        res.status(500).json({ error: "Internal Server Error", details: error.message });
+    if (querySnapshot.empty) {
+      console.warn("⚠ No attendance records found for today.");
+      return res.status(200).json({ attendance: [] });
     }
+
+    const attendanceRecords = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      attendanceRecords.push({
+        name: data.name || "Unknown",
+        code: "Hidden", // Keep the code hidden for security
+        date: data.date || new Date().toISOString(),
+        timestamp: data.timestamp ? data.timestamp.toMillis() : 0
+      });
+    });
+
+    console.log("✅ Successfully fetched attendance data for today.");
+    res.status(200).json({ attendance: attendanceRecords });
+  } catch (error) {
+    console.error("🔥 API ERROR:", error);
+    res.status(500).json({ error: "Internal Server Error", details: error.message });
+  }
 }
