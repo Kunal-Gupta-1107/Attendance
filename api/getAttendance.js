@@ -14,6 +14,15 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase App
+try {
+  console.log("Firebase config:", firebaseConfig); // Log config for debugging
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+} catch (error) {
+  console.error("Firebase Initialization Error:", error);
+  throw error; // Re-throw to trigger catch block in handler
+}
+// Initialize Firebase App
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
