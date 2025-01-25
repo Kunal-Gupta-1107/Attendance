@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 
-// Securely load Firebase config from environment variables
+// 🔒 Secure Firebase configuration (ENV variables must be set in Vercel)
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_API_KEY,
     authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -11,7 +11,7 @@ const firebaseConfig = {
     appId: process.env.FIREBASE_APP_ID
 };
 
-// Initialize Firebase (Only on the backend)
+// 🔥 Initialize Firebase securely on the backend
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
@@ -21,17 +21,18 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { name, attendanceCode } = req.body;
+        const { name, attendanceCode, timestamp, date } = req.body;
 
-        if (!name || !attendanceCode) {
+        if (!name || !attendanceCode || !timestamp || !date) {
             return res.status(400).json({ error: "Missing required fields" });
         }
 
+        // ✅ Add attendance to Firestore
         await addDoc(collection(db, "attendance"), {
             name,
             attendanceCode,
-            timestamp: serverTimestamp(),
-            date: new Date().toLocaleDateString()
+            timestamp: serverTimestamp(), // Use Firestore server timestamp
+            date
         });
 
         res.status(200).json({ success: true, message: "Attendance added successfully" });
