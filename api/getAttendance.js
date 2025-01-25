@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 
+// Firebase configuration
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_API_KEY,
     authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -10,9 +11,18 @@ const firebaseConfig = {
     appId: process.env.FIREBASE_APP_ID
 };
 
-// ✅ Initialize Firebase app
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// Function to return the collection ID for today's messages
+function getTodayCollectionId() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0'); // Ensure two digits for month
+    const day = String(today.getDate()).padStart(2, '0'); // Ensure two digits for day
+    return `${year}-${month}-${day}`; // Format as "YYYY-MM-DD"
+}
 
 export default async function handler(req, res) {
     if (req.method !== "GET") {
@@ -20,31 +30,26 @@ export default async function handler(req, res) {
     }
 
     try {
-        console.log("🔥 Fetching attendance data...");
+        const collectionId = getTodayCollectionId(); // Get today's collection ID
+        const messagesRef = collection(db, `group_chats/${collectionId}/messages`);
+        const querySnapshot = await getDocs(messagesRef);
 
-        // ✅ Ensure Firestore query is correct
-        const querySnapshot = await getDocs(collection(db, "attendance"));
-        if (querySnapshot.empty) {
-            console.warn("⚠️ No attendance records found.");
-            return res.status(200).json({ attendance: [] });
-        }
-
-        const attendanceRecords = [];
+        let messagesArray = [];
         querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            attendanceRecords.push({
-                name: data.name || "Unknown",
-                code: "Hidden",
-                date: data.date || new Date().toISOString(),
-                timestamp: data.timestamp ? data.timestamp.toMillis() : 0
+            const messageData = doc.data();
+            messagesArray.push({
+                message: messageData.message,
+                sender: messageData.sender,
+                time: new Date(messageData.time.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
             });
         });
 
-        console.log("✅ Successfully fetched attendance data.");
-        res.status(200).json({ attendance: attendanceRecords });
+        // Reverse the array so the latest messages appear last
+        messagesArray.reverse();
 
+        res.status(200).json({ messages: messagesArray });
     } catch (error) {
-        console.error("🔥 API ERROR:", error);
-        res.status(500).json({ error: "Internal Server Error", details: error.message });
+        console.error("Error fetching messages:", error);
+        res.status(500).json({ error: "Failed to fetch messages", details: error.message });
     }
 }
