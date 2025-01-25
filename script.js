@@ -536,77 +536,59 @@ async function sendMessage() {
 
 // func to fectch display messages from Firebase
 async function fetchMessages() {
-    if (!db) {
-        console.error("❌ Firestore is not initialized yet!");
-        return;
-    }
-    const collectionId = getTodayCollectionId(); // Get today's collection ID
-    const messagesRef = collection(db, `group_chats/${collectionId}/messages`); // Reference to the collection
-    console.log("📂 Firestore Collection Reference Created:", messagesRef);
-
-    // Fetching data from Firestore
-    const querySnapshot = await getDocs(messagesRef);
     const messagesContainer = document.querySelector('.chat-body'); // The div where you want to display the messages
+    if (!messagesContainer) return; // Exit if .chat-body is not found
 
-    if (!messagesContainer) {
-        // console.log('Not is Index-2');
-        return; // Exit the function if .chat-body is not found
+    try {
+        const response = await fetch('/api/fetchMessages');
+        const result = await response.json();
+
+        if (response.ok) {
+            // Clear current messages before displaying new ones
+            messagesContainer.innerHTML = '';
+
+            // Add a welcome message
+            const welcomeMessage = document.createElement('div');
+            welcomeMessage.classList.add('message', 'default-msg');
+            welcomeMessage.innerHTML = `
+                <p>Welcome to <strong>MarkMates Group</strong> chat!</p>
+                <span class="message-time">00:00</span>
+                <p> Must Read our <a href="https://kunal-gupta-1107.github.io/Attendance/T&C.html">T&C.</a></p>
+                <span class="message-time">00:00</span>
+                <p> Be part of our survey: <a href="https://forms.gle/2N1T2HvWHU9J9fW96">Let's go</a>.</p>
+            `;
+            messagesContainer.appendChild(welcomeMessage);
+
+            // Display fetched messages
+            result.messages.forEach((messageData) => {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                messageElement.classList.add(messageData.sender === "Tester" ? 'user-msg' : 'bot-msg');
+
+                messageElement.innerHTML = `
+                    <p>${messageData.message}</p>
+                    <span class="message-time">${messageData.time}</span>
+                `;
+
+                messagesContainer.appendChild(messageElement);
+            });
+
+            // Scroll to the bottom after loading all messages
+            scrollToBottom();
+        } else {
+            console.error('Error fetching messages:', result.error);
+        }
+    } catch (error) {
+        console.error('❌ Error fetching messages:', error);
     }
-
-    // Clear current messages before displaying new ones
-    messagesContainer.innerHTML = '';
-
-
-    const welcomeMessage = document.createElement('div');
-    welcomeMessage.classList.add('message', 'default-msg');
-    welcomeMessage.innerHTML = `
-        <p>Welcome to <strong>MarkMates Group</strong> chat!</p>
-        <span class="message-time">00:00</span>
-        <p> Must Read our <a href="https://kunal-gupta-1107.github.io/Attendance/T&C.html">T&C.</a></p>
-        <span class="message-time">00:00</span>
-        <p> Be part of our survey: <a href="https://forms.gle/2N1T2HvWHU9J9fW96">Let's go</a>.</p>
-    `;
-    messagesContainer.appendChild(welcomeMessage);
-
-
-    let messagesArray = [];
-    
-    querySnapshot.forEach((doc) => {
-        const messageData = doc.data();
-        messagesArray.push({
-            message: messageData.message,
-            sender: messageData.sender,
-            time: new Date(messageData.time.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-        });
-    });
-
-    // Reverse the array so latest messages come last
-    messagesArray.reverse();
-
-    // Loop through the reversed messages array and append them to the chat
-    messagesArray.forEach((messageData) => {
-        const messageElement = document.createElement('div');
-        messageElement.classList.add('message');
-        messageElement.classList.add(messageData.sender === "Tester" ? 'user-msg' : 'bot-msg');
-        
-        // Create HTML structure for the message
-        messageElement.innerHTML = `
-            <p>${messageData.message}</p>
-            <span class="message-time">${messageData.time}</span>
-        `;
-        
-        messagesContainer.appendChild(messageElement);
-    });
-
-    // Scroll to the bottom after loading all messages (including the welcome message and all Firestore messages)
-    scrollToBottom();
 }
 
 // Call the fetchMessages function when the page loads
 window.addEventListener('load', async () => {
     console.log("🔥 Page loaded. Fetching messages...");
-    fetchMessages(); // Call your Firestore function safely
+    fetchMessages(); // Fetch messages via the API route
 });
+
 
 
 
