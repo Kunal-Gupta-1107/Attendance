@@ -374,52 +374,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 });
+
+
 async function displayAttendance() {
     const attendanceList = document.getElementById('attendanceList').getElementsByTagName('tbody')[0];
-        attendanceList.innerHTML = ''; // Clear the current attendance list
-        const querySnapshot = await getDocs(collection(db, "attendance"));
-        const attendanceRecords = [];
-    
+    attendanceList.innerHTML = ''; // Clear the current attendance list
+
+    try {
+        const response = await fetch("/api/getAttendance");
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Failed to fetch attendance data");
+        }
+
+        const attendanceRecords = data.attendance;
         const today = new Date();
-        
-        querySnapshot.forEach((doc) => {
-            const data = doc.data();
-            let attendanceDate;
-            let hiddenCode = "Hidden";
-    
-            if (data.date && data.date.includes('/')) {
-                const dateParts = data.date.split('/');
-                if (dateParts.length === 3) {
-                    const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
-                    if (!isNaN(mmddDate) && mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
-                        attendanceDate = mmddDate;
-                    }
-    
-                    const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
-                    if (!attendanceDate && !isNaN(ddmmDate) && ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
-                        attendanceDate = ddmmDate;
-                    }
-                }
-            }
-    
-            if (attendanceDate) {
-                attendanceRecords.push({
-                    name: data.name,
-                    code: hiddenCode,
-                    date: attendanceDate,
-                    timestamp: data.timestamp
-                });
-            }
-        });
-    
-        attendanceRecords.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
-    
+
         if (attendanceRecords.length > 0) {
             attendanceRecords.forEach((record) => {
                 const row = attendanceList.insertRow();
                 row.insertCell(0).textContent = record.name;
                 row.insertCell(1).textContent = record.code;
-                row.insertCell(2).textContent = record.date.toLocaleDateString();
+                row.insertCell(2).textContent = new Date(record.date).toLocaleDateString();
             });
         } else {
             const row = attendanceList.insertRow();
@@ -427,8 +404,16 @@ async function displayAttendance() {
             row.insertCell(1).textContent = "No Code For Attendance";
             row.insertCell(2).textContent = today.toLocaleDateString();
         }
-        
+    } catch (error) {
+        console.error("Error fetching attendance:", error);
+        const row = attendanceList.insertRow();
+        row.insertCell(0).textContent = "Error";
+        row.insertCell(1).textContent = "Failed to load data";
+        row.insertCell(2).textContent = new Date().toLocaleDateString();
+    }
 }
+
+
 function getTodayCollectionId() {
     let now = new Date();
     let year = now.getFullYear();
