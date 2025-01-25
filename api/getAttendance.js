@@ -18,8 +18,7 @@ export default async function handler(req, res) {
     if (req.method !== "GET") {
         return res.status(405).json({ error: "Method Not Allowed" });
     }
-
-    // Check if we are requesting the attendance code or attendance records
+     // Check if we are requesting the attendance code or attendance records
     if (req.query.type === "attendanceCode") {
         try {
             // Fetch the attendance code from Firestore
@@ -45,7 +44,7 @@ export default async function handler(req, res) {
         console.log("🔥 Fetching today's attendance data...");
 
         const today = new Date();
-        const todayFormatted = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+        const todayFormatted = today.toLocaleDateString(); // Format: mm/dd/yyyy or dd/mm/yyyy depending on locale
 
         const querySnapshot = await getDocs(collection(db, "attendance"));
         if (querySnapshot.empty) {
@@ -56,29 +55,29 @@ export default async function handler(req, res) {
         const attendanceRecords = [];
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            const recordDate = data.date || ""; // Get the date value
+            let attendanceDate = null;
 
-            // Function to normalize date into YYYY-MM-DD format
-            const normalizeDate = (dateStr) => {
-                const parts = dateStr.split('/');
-                if (parts.length === 3) {
-                    // Handle dd/mm/yyyy format (index 0 is day, index 1 is month, index 2 is year)
-                    if (parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
-                        return `${parts[2]}-${parts[1]}-${parts[0]}`; // Return in YYYY-MM-DD
+            // If the date exists and is in a non-standard format, handle it
+            if (data.date && data.date.includes('/')) {
+                const dateParts = data.date.split('/'); // Split date by '/'
+
+                if (dateParts.length === 3) {
+                    // Try mm/dd/yyyy format
+                    const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
+                    if (!isNaN(mmddDate) && mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
+                        attendanceDate = mmddDate;
                     }
-                    // Handle mm/dd/yyyy format (index 0 is month, index 1 is day, index 2 is year)
-                    if (parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
-                        return `${parts[2]}-${parts[0]}-${parts[1]}`; // Return in YYYY-MM-DD
+
+                    // Try dd/mm/yyyy format (if not already matched)
+                    const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+                    if (!attendanceDate && !isNaN(ddmmDate) && ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
+                        attendanceDate = ddmmDate;
                     }
                 }
-                return null; // Invalid date format
-            };
+            }
 
-            // Normalize both today's date and the record's date
-            const normalizedRecordDate = normalizeDate(recordDate);
-
-            // If the normalized date matches today's date, add it to the list
-            if (normalizedRecordDate === todayFormatted) {
+            // If the date matches today's date, add it to the list
+            if (attendanceDate) {
                 attendanceRecords.push({
                     name: data.name || "Unknown",
                     code: "Hidden", // Keep the code hidden for security
