@@ -422,14 +422,26 @@ function getTodayCollectionId() {
 
 
 async function sendMessageToFirebase(message, sender) {
-    const collectionId = getTodayCollectionId(); // Get today's date as collection ID
-    const messageRef = collection(db, `group_chats/${collectionId}/messages`);
-    await addDoc(messageRef, {
-        message: message,
-        sender: sender,
-        time: serverTimestamp()
-    });
+    try {
+        const response = await fetch('/api/addMessage', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message, sender })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            console.log("📨 Message sent successfully:", result);
+        } else {
+            console.error("❌ Error sending message:", result.error);
+        }
+    } catch (error) {
+        console.error("❌ Network error:", error);
+    }
 }
+
 
 async function sendMessage() {
     let inputField = document.getElementById('chat-input');
