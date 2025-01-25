@@ -64,22 +64,23 @@ let db;
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 // Function to retrieve the attendance code from Firestore
 const retrieveAttendanceCode = async () => {
-    // Reference the specific document in Firestore
-    const codeDoc = doc(db, 'attendanceCodes', 'currentCode');
     try {
-        const docSnapshot = await getDoc(codeDoc);
-        if (docSnapshot.exists()) {
-            const validCode = docSnapshot.data().code;  // Get the stored code
-            console.log("Attendance Code: Beta Code to Hidden hai");  // Log the retrieved code
-            return validCode;  // Return the code
+        const response = await fetch("/api/getAttendance?type=attendanceCode");
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log("Attendance Code:", data.code);
+            return data.code;
         } else {
-            console.log("No such document found in Firestore.");
+            console.error("Error fetching attendance code:", data.error);
             return null;
         }
     } catch (error) {
-        console.error("Error retrieving attendance code:", error);
+        console.error("Error during fetch:", error);
+        return null;
     }
 };
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
