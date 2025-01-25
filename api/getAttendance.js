@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { getFirestore, collection, getDocs, getDoc, doc } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_API_KEY,
@@ -18,7 +18,8 @@ export default async function handler(req, res) {
     if (req.method !== "GET") {
         return res.status(405).json({ error: "Method Not Allowed" });
     }
-     // Check if we are requesting the attendance code or attendance records
+
+    // Check if we are requesting the attendance code or attendance records
     if (req.query.type === "attendanceCode") {
         try {
             // Fetch the attendance code from Firestore
