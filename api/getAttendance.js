@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs } from "firebase/firestore"; // ✅ Ensure getDocs is imported
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_API_KEY,
@@ -24,8 +24,12 @@ export default async function handler(req, res) {
 
         // ✅ Ensure Firestore query is correct
         const querySnapshot = await getDocs(collection(db, "attendance"));
-        const attendanceRecords = [];
+        if (querySnapshot.empty) {
+            console.warn("⚠️ No attendance records found.");
+            return res.status(200).json({ attendance: [] });
+        }
 
+        const attendanceRecords = [];
         querySnapshot.forEach((doc) => {
             const data = doc.data();
             attendanceRecords.push({
@@ -41,6 +45,6 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error("🔥 API ERROR:", error);
-        res.status(500).json({ error: "Failed to fetch attendance records", details: error.message });
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 }
