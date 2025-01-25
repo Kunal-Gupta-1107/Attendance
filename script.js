@@ -215,29 +215,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if(form) { // coz isn't in 2
+    if (form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
-        
+            
             // Show the spinner when form submission starts
             document.getElementById('loading-spinner-container').style.display = 'flex';
-        
+            
+            // Disable form fields to prevent multiple submissions
+            submitButton.disabled = true;
+            nameInput.disabled = true;
+            codeInput.disabled = true;
+    
             try {
                 const name = nameInput.value.trim();
                 const attendanceCode = codeInput.value.trim();
                 const isWithinLocation = await checkLocation();
                 const currentCode = await retrieveAttendanceCode();
-        
+                
                 if (isWithinLocation) {
                     const currentDate = new Date().toLocaleDateString();
                     const isDuplicate = await checkDuplicate(name, currentDate);
-        
+    
                     if (!isDuplicate && attendanceCode === currentCode) {
                         await addAttendance(name, attendanceCode);
                         alert('Attendance marked successfully!');
                         nameInput.value = '';
                         codeInput.value = '';
-                        submitButton.disabled = true;
                     } else {
                         alert(isDuplicate ? 'Attendance already marked for today.' : 'Incorrect attendance code.');
                     }
@@ -250,9 +254,15 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 // Hide the spinner after all operations are complete
                 document.getElementById('loading-spinner-container').style.display = 'none';
+                
+                // Re-enable form fields and submit button
+                submitButton.disabled = false;
+                nameInput.disabled = false;
+                codeInput.disabled = false;
             }
         });
     }
+
 
         const installButton = document.getElementById("installButton");
         
