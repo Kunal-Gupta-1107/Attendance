@@ -36,7 +36,7 @@ const initializeFirebase = async () => {
         if (!response.ok) throw new Error("Failed to fetch Firebase config");
 
         const config = await response.json();
-        / Ensure the config is valid before using it
+        // Ensure the config is valid before using it
         if (!config.apiKey || !config.projectId) {
             throw new Error("Invalid Firebase Config Received");
         }
