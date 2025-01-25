@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, getDoc } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_API_KEY,
@@ -19,10 +19,31 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: "Method Not Allowed" });
     }
 
+    // Check if we are requesting the attendance code or attendance records
+    if (req.query.type === "attendanceCode") {
+        try {
+            // Fetch the attendance code from Firestore
+            const codeDoc = doc(db, 'attendanceCodes', 'currentCode');
+            const docSnapshot = await getDoc(codeDoc);
+
+            if (docSnapshot.exists()) {
+                const validCode = docSnapshot.data().code;
+                console.log("🔥 Attendance Code retrieved.");
+                return res.status(200).json({ code: validCode });
+            } else {
+                console.log("⚠️ No attendance code found.");
+                return res.status(404).json({ error: "Attendance code not found" });
+            }
+        } catch (error) {
+            console.error("🔥 Error retrieving attendance code:", error);
+            return res.status(500).json({ error: "Failed to fetch attendance code" });
+        }
+    }
+
+    // Default case: Fetch attendance records
     try {
         console.log("🔥 Fetching attendance data...");
 
-        // ✅ Ensure Firestore query is correct
         const querySnapshot = await getDocs(collection(db, "attendance"));
         if (querySnapshot.empty) {
             console.warn("⚠️ No attendance records found.");
@@ -34,7 +55,7 @@ export default async function handler(req, res) {
             const data = doc.data();
             attendanceRecords.push({
                 name: data.name || "Unknown",
-                code: "Hidden",
+                code: "Hidden", // Keep the code hidden for security
                 date: data.date || new Date().toISOString(),
                 timestamp: data.timestamp ? data.timestamp.toMillis() : 0
             });
