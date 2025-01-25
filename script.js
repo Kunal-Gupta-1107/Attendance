@@ -158,26 +158,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function addAttendance(name, attendanceCode) {
-        const attendanceData = {
-            name: name,
-            attendanceCode: attendanceCode,
-            timestamp: new Date().toISOString(), // Store the timestamp as a string
-            date: new Date().toLocaleDateString() // Store the date as a string
-        };
+        try {
+            const attendanceData = {
+                name: name,
+                attendanceCode: attendanceCode,
+                timestamp: new Date().toISOString(), // Store timestamp as a string
+                date: new Date().toLocaleDateString() // Store date as a string
+            };
     
-        const response = await fetch('/api/addAttendance', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(attendanceData) // Send the attendance data
-        });
+            const response = await fetch('/api/addAttendance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(attendanceData) // Send the attendance data
+            });
     
-        const result = await response.json();
-        if (response.ok) {
-            console.log('Attendance added successfully:', result);
-        } else {
-            console.error('Error adding attendance:', result.error);
+            const result = await response.json();
+            if (response.ok) {
+                console.log('✅ Attendance added successfully:', result);
+            } else {
+                console.error('❌ Error adding attendance:', result.error);
+            }
+    
+        } catch (error) {
+            console.error('❌ Request Failed:', error);
         }
     }
 
