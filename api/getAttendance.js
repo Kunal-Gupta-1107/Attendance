@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 
-// 🔒 Secure Firebase configuration (ENV variables must be set in Vercel)
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_API_KEY,
     authDomain: process.env.FIREBASE_AUTH_DOMAIN,
@@ -11,34 +10,55 @@ const firebaseConfig = {
     appId: process.env.FIREBASE_APP_ID
 };
 
-// 🔥 Initialize Firebase securely on the backend
-const firebaseApp = initializeApp(firebaseConfig);
-const db = getFirestore(firebaseApp);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 export default async function handler(req, res) {
-    if (req.method !== "POST") {
+    if (req.method !== "GET") {
         return res.status(405).json({ error: "Method Not Allowed" });
     }
 
     try {
-        const { name, attendanceCode, timestamp, date } = req.body;
+        const querySnapshot = await getDocs(collection(db, "attendance"));
+        const attendanceRecords = [];
+    
+        const today = new Date();
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            let attendanceDate;
+            let hiddenCode = "Hidden";
 
-        if (!name || !attendanceCode || !timestamp || !date) {
-            return res.status(400).json({ error: "Missing required fields" });
-        }
+            if (data.date && data.date.includes('/')) {
+                const dateParts = data.date.split('/');
+                if (dateParts.length === 3) {
+                    const mmddDate = new Date(`${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`);
+                    if (!isNaN(mmddDate) && mmddDate.toLocaleDateString() === today.toLocaleDateString()) {
+                        attendanceDate = mmddDate;
+                    }
 
-        // ✅ Add attendance to Firestore
-        await addDoc(collection(db, "attendance"), {
-            name,
-            attendanceCode,
-            timestamp: serverTimestamp(), // Use Firestore server timestamp
-            date
+                    const ddmmDate = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
+                    if (!attendanceDate && !isNaN(ddmmDate) && ddmmDate.toLocaleDateString() === today.toLocaleDateString()) {
+                        attendanceDate = ddmmDate;
+                    }
+                }
+            }
+
+            if (attendanceDate) {
+                attendanceRecords.push({
+                    name: data.name,
+                    code: hiddenCode,
+                    date: attendanceDate,
+                    timestamp: data.timestamp.toMillis()
+                });
+            }
         });
 
-        res.status(200).json({ success: true, message: "Attendance added successfully" });
+        // Sort by timestamp
+        attendanceRecords.sort((a, b) => a.timestamp - b.timestamp);
 
+        res.status(200).json({ attendance: attendanceRecords });
     } catch (error) {
-        console.error("🔥 Firebase Error:", error);
-        res.status(500).json({ error: "Failed to add attendance" });
+        res.status(500).json({ error: "Failed to fetch attendance records" });
     }
 }
