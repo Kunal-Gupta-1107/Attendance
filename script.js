@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 registration.showNotification("I Welcome you!", {
                                     body: "Thanks for enabling me.😊",
                                     icon: "https://kunal-gupta-1107.github.io/Attendance/icon.png",
-                                    badge: "/Attendance/badge.png",
+                                    badge: "/badge.png",
                                     vibrate: [200, 100, 200] 
                                 });
                             });
