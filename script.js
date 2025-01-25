@@ -313,8 +313,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             navigator.serviceWorker.ready.then(registration => {
                                 registration.showNotification("I Welcome you!", {
                                     body: "Thanks for enabling me.😊",
-                                    icon: "https://kunal-gupta-1107.github.io/Attendance/icon.png",
-                                    badge: "/badge.png",
+                                    icon: "https://attendance-lemon.vercel.app/icon.png",
+                                    badge: "https://attendance-lemon.vercel.app/badge.png",
                                     vibrate: [200, 100, 200] 
                                 });
                             });
