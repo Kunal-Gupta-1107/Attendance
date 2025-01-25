@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs, doc, getDoc, query, where } from "firebase/firestore";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_API_KEY,
@@ -13,14 +13,6 @@ const firebaseConfig = {
 // ✅ Initialize Firebase app
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-
-// Helper function to get today's date in yyyy-mm-dd format
-const getFormattedDate = (date) => {
-    const dd = String(date.getDate()).padStart(2, '0');
-    const mm = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-    const yyyy = date.getFullYear();
-    return `${yyyy}-${mm}-${dd}`; // Return in yyyy-mm-dd format
-};
 
 export default async function handler(req, res) {
     if (req.method !== "GET") {
@@ -52,28 +44,48 @@ export default async function handler(req, res) {
     try {
         console.log("🔥 Fetching today's attendance data...");
 
-        const todayDate = getFormattedDate(new Date()); // Today's date in yyyy-mm-dd format
+        const today = new Date();
+        const todayFormatted = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
 
-        // Query Firestore for records where the date matches today's date
-        const querySnapshot = await getDocs(query(
-            collection(db, "attendance"),
-            where("date", "==", todayDate) // Filter records by today's date
-        ));
-
+        const querySnapshot = await getDocs(collection(db, "attendance"));
         if (querySnapshot.empty) {
-            console.warn("⚠ No attendance records for today.");
+            console.warn("⚠ No attendance records found.");
             return res.status(200).json({ attendance: [] });
         }
 
         const attendanceRecords = [];
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            attendanceRecords.push({
-                name: data.name || "Unknown",
-                code: "Hidden", // Keep the code hidden for security
-                date: data.date || new Date().toISOString(),
-                timestamp: data.timestamp ? data.timestamp.toMillis() : 0
-            });
+            const recordDate = data.date || ""; // Get the date value
+
+            // Function to normalize date into YYYY-MM-DD format
+            const normalizeDate = (dateStr) => {
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    // Handle dd/mm/yyyy format (index 0 is day, index 1 is month, index 2 is year)
+                    if (parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+                        return `${parts[2]}-${parts[1]}-${parts[0]}`; // Return in YYYY-MM-DD
+                    }
+                    // Handle mm/dd/yyyy format (index 0 is month, index 1 is day, index 2 is year)
+                    if (parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+                        return `${parts[2]}-${parts[0]}-${parts[1]}`; // Return in YYYY-MM-DD
+                    }
+                }
+                return null; // Invalid date format
+            };
+
+            // Normalize both today's date and the record's date
+            const normalizedRecordDate = normalizeDate(recordDate);
+
+            // If the normalized date matches today's date, add it to the list
+            if (normalizedRecordDate === todayFormatted) {
+                attendanceRecords.push({
+                    name: data.name || "Unknown",
+                    code: "Hidden", // Keep the code hidden for security
+                    date: data.date || new Date().toISOString(),
+                    timestamp: data.timestamp ? data.timestamp.toMillis() : 0
+                });
+            }
         });
 
         console.log("✅ Successfully fetched today's attendance data.");
