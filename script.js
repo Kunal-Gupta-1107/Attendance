@@ -382,7 +382,12 @@ async function displayAttendance() {
 
     try {
         const response = await fetch("/api/getAttendance");
-        const data = await response.json();
+
+        // Check if response is not JSON
+        const textData = await response.text();
+        console.log("Raw API Response:", textData);
+
+        const data = JSON.parse(textData); // Convert to JSON
 
         if (!response.ok) {
             throw new Error(data.error || "Failed to fetch attendance data");
@@ -407,11 +412,12 @@ async function displayAttendance() {
     } catch (error) {
         console.error("Error fetching attendance:", error);
         const row = attendanceList.insertRow();
-        row.insertCell(0).textContent = "😵Something bad happened";
-        row.insertCell(1).textContent = "🔒Security Increase";
+        row.insertCell(0).textContent = "Error";
+        row.insertCell(1).textContent = "Failed to load data";
         row.insertCell(2).textContent = new Date().toLocaleDateString();
     }
 }
+
 
 
 function getTodayCollectionId() {
