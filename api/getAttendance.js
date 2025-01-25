@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { getFirestore, collection, getDocs, doc, getDoc, query, where } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: process.env.FIREBASE_API_KEY,
@@ -13,6 +13,14 @@ const firebaseConfig = {
 // ✅ Initialize Firebase app
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// Helper function to get today's date in yyyy-mm-dd format
+const getFormattedDate = (date) => {
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+    const yyyy = date.getFullYear();
+    return `${yyyy}-${mm}-${dd}`; // Return in yyyy-mm-dd format
+};
 
 export default async function handler(req, res) {
     if (req.method !== "GET") {
@@ -40,16 +48,20 @@ export default async function handler(req, res) {
         }
     }
 
-    // Default case: Fetch attendance records
+    // Default case: Fetch today's attendance records
     try {
-        const today = new Date().toISOString().split('T')[0]; 
-        console.log("🔥 Fetching attendance data for today...");
+        console.log("🔥 Fetching today's attendance data...");
 
-        const q = query(collection(db, "attendance"), where("date", "==", today)); 
-        const querySnapshot = await getDocs(q);
+        const todayDate = getFormattedDate(new Date()); // Today's date in yyyy-mm-dd format
+
+        // Query Firestore for records where the date matches today's date
+        const querySnapshot = await getDocs(query(
+            collection(db, "attendance"),
+            where("date", "==", todayDate) // Filter records by today's date
+        ));
 
         if (querySnapshot.empty) {
-            console.warn("⚠ No attendance records found for today.");
+            console.warn("⚠ No attendance records for today.");
             return res.status(200).json({ attendance: [] });
         }
 
@@ -59,16 +71,16 @@ export default async function handler(req, res) {
             attendanceRecords.push({
                 name: data.name || "Unknown",
                 code: "Hidden", // Keep the code hidden for security
-                date: data.date || new Date().toISOString(), 
-                timestamp: data.timestamp ? data.timestamp.toMillis() : 0 
+                date: data.date || new Date().toISOString(),
+                timestamp: data.timestamp ? data.timestamp.toMillis() : 0
             });
         });
 
-        console.log("✅ Successfully fetched attendance data for today.");
+        console.log("✅ Successfully fetched today's attendance data.");
         res.status(200).json({ attendance: attendanceRecords });
 
-        } catch (error) {
-            console.error("🔥 API ERROR:", error);
-            res.status(500).json({ error: "Internal Server Error", details: error.message });
-        }
+    } catch (error) {
+        console.error("🔥 API ERROR:", error);
+        res.status(500).json({ error: "Internal Server Error", details: error.message });
+    }
 }
