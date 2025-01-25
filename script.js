@@ -574,8 +574,8 @@ async function fetchMessages() {
 
 // Call the fetchMessages function when the page loads
 window.addEventListener('load', async () => {
-    await initializeFirebase(); // Ensure Firebase is initialized
-    fetchMessages(); // Now call Firestore function safely
+    console.log("🔥 Page loaded. Fetching messages...");
+    fetchMessages(); // Call your Firestore function safely
 });
 
 
