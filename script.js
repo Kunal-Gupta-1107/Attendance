@@ -395,10 +395,10 @@ async function displayAttendance() {
         const response = await fetch("/api/getAttendance");
 
         // Check if response is not JSON
-        const textData = await response.text();
-        console.log("Raw API Response:", textData);
+        /*const textData = await response.text();    // enable both 1
+        console.log("Raw API Response:", textData);*/   // enable both 2
 
-        const data = JSON.parse(textData); // Convert to JSON
+        // const data = JSON.parse(textData); // Convert to JSON  //enable both 3
 
         if (!response.ok) {
             throw new Error(data.error || "Failed to fetch attendance data");
