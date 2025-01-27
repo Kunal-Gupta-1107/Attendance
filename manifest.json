@@ -8,7 +8,7 @@
       "type": "image/png"
     }
   ],
-  "start_url": "/Attendance/", 
+  "start_url": "/", 
   "display": "standalone",
   "background_color": "#0333C3",
   "theme_color": "#000000",
