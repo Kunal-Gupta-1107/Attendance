@@ -1,4 +1,4 @@
-const CACHE_NAME = 'markmates-cache-v4.1';
+const CACHE_NAME = 'markmates-cache-v5';
 const urlsToCache = [
   '/',         
   '/index.html',
@@ -42,7 +42,7 @@ self.addEventListener('fetch', (event) => {
       });
     }).catch(() => {
       // If both cache and network fail, show an offline fallback
-      return caches.match('/Attendance/offline.html');
+      return caches.match('/offline.html');
     })
   );
 });
@@ -79,12 +79,20 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then((clientList) => {
       // If already open, focus it, otherwise open a new one
-      let openWindow = clientList.find(client => client.url === 'https://kunal-gupta-1107.github.io/Attendance/' && 'focus' in client);
+      let openWindow = clientList.find(client => client.url === 'https://attendance-lemon.vercel.app' && 'focus' in client);
       if (openWindow) {
         openWindow.focus();
       } else {
-        clients.openWindow('https://kunal-gupta-1107.github.io/Attendance/'); // ye agar window not found
+        clients.openWindow('https://attendance-lemon.vercel.app'); // ye agar window not found
       }
     }).catch(err => console.error('Failed to open window:', err))
   );
 });
+
+
+
+
+
+
+// in manifest.json 
+// "start_url": "/Attendance/",     ->       "start_url": "/",
