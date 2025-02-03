@@ -406,7 +406,8 @@ async function displayAttendance() {
 
         const attendanceRecords = data.attendance;
         const today = new Date();
-
+        attendanceRecords.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
+        
         if (attendanceRecords.length > 0) {
             attendanceRecords.forEach((record) => {
                 const row = attendanceList.insertRow();
@@ -423,8 +424,8 @@ async function displayAttendance() {
     } catch (error) {
         console.error("Error fetching attendance:", error);
         const row = attendanceList.insertRow();
-        row.insertCell(0).textContent = "Error";
-        row.insertCell(1).textContent = "Failed to load data";
+        row.insertCell(0).textContent = "Error Occured😵";
+        row.insertCell(1).textContent = "Failed to load data, security increased 🔐";
         row.insertCell(2).textContent = new Date().toLocaleDateString();
     }
 }
