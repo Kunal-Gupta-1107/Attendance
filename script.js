@@ -406,7 +406,8 @@ async function displayAttendance() {
 
         const attendanceRecords = data.attendance;
         const today = new Date();
-        // attendanceRecords.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
+        attendanceRecords.sort((a, b) => a.timestamp - b.timestamp);
+        console.log(attendanceRecords);
         
         if (attendanceRecords.length > 0) {
             attendanceRecords.forEach((record) => {
