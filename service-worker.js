@@ -23,7 +23,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting(); // Activate the new service worker immediately
 });
 
-// Fetch event: Serve cached content or fallback to network
+// Fetch event: Serve network content or fallback to cache
 self.addEventListener('fetch', (event) => {
   // Only cache GET requests to avoid caching sensitive data sent via POST/PUT/DELETE
   if (event.request.method !== 'GET') {
@@ -31,21 +31,23 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Return cached response if available, else fetch from network
-      return response || fetch(event.request).then((networkResponse) => {
-        // Optionally, you can cache the new response if necessary:
+    fetch(event.request)
+      .then((networkResponse) => {
+        // If the network response is successful, update the cache with the new response
         return caches.open(CACHE_NAME).then((cache) => {
           cache.put(event.request, networkResponse.clone());
           return networkResponse;
         });
-      });
-    }).catch(() => {
-      // If both cache and network fail, show an offline fallback
-      return caches.match('/offline.html');
-    })
+      })
+      .catch(() => {
+        // If the network request fails, fallback to the cache
+        return caches.match(event.request).then((cachedResponse) => {
+          return cachedResponse || caches.match('/offline.html');
+        });
+      })
   );
 });
+
 
 // Activate event: Clean up old caches
 self.addEventListener('activate', (event) => {
