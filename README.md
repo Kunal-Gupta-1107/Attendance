@@ -1,7 +1,7 @@
 # Attendance PWA
 
 ## Overview
-The *Attendance PWA* is a progressive web application designed to simplify attendance marking for students. The application allows students to mark their attendance only if they are within a **25-meter radius** of the classroom's GPS coordinates. It is built using *HTML, CSS, and JavaScript* and utilizes **Firebase** for secure attendance storage.
+The *Attendance PWA* is a progressive web application designed to simplify attendance marking for students. The application allows students to mark their attendance only if they are within a **100-meter radius** of the classroom's GPS coordinates. It is built using *HTML, CSS, and JavaScript* and utilizes **Firebase** for secure attendance storage.
 
 ## Features
 - 📍 **GPS-based Attendance**: Students can only mark attendance when they are near the classroom.
