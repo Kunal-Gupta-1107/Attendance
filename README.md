@@ -19,7 +19,7 @@ The *Attendance PWA* is a progressive web application designed to simplify atten
 
 ## Deployment
 The PWA is hosted on **GitHub Pages** and can be accessed at:
-🔗 [Attendance PWA]([https://attendance-lemon.vercel.app/])
+🔗 [Attendance PWA](https://attendance-lemon.vercel.app/)
 
 ## Installation
 You can install the PWA on your device for a native-like experience:
