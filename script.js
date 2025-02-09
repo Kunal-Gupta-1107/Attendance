@@ -43,12 +43,12 @@ let db;
 //         const app = initializeApp(config);
 //         db = getFirestore(app); // Assign db after successful initialization
 
-//         console.log("🔥 Firebase Initialized Securely");
+//         .log("🔥 Firebase Initialized Securely");
 
 //         // Now call functions that require `db`
 //        // fetchMessages(); // Ensure this runs only after Firebase is ready
 //     } catch (error) {
-//         console.error("❌ Firebase Initialization Error:", error);
+//         .error("❌ Firebase Initialization Error:", error);
 //     }
 // };
 
@@ -69,7 +69,6 @@ const retrieveAttendanceCode = async () => {
         const data = await response.json();
 
         if (response.ok) {
-            console.log("Attendance Code:", data.code);
             return data.code;
         } else {
             console.error("Error fetching attendance code:", data.error);
