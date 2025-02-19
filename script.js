@@ -29,37 +29,6 @@ import { getFirestore, collection, addDoc, getDocs, serverTimestamp, query, wher
 
 let db;
 
-// // Function to initialize Firebase securely
-// const initializeFirebase = async () => {
-//     try {
-//         const response = await fetch("/api/getAttendance"); // Fetch Firebase config
-//         if (!response.ok) throw new Error("Failed to fetch Firebase config");
-
-//         const config = await response.json();
-//         // Ensure the config is valid before using it
-//         if (!config.apiKey || !config.projectId) {
-//             throw new Error("Invalid Firebase Config Received");
-//         }
-//         const app = initializeApp(config);
-//         db = getFirestore(app); // Assign db after successful initialization
-
-//         .log("🔥 Firebase Initialized Securely");
-
-//         // Now call functions that require `db`
-//        // fetchMessages(); // Ensure this runs only after Firebase is ready
-//     } catch (error) {
-//         .error("❌ Firebase Initialization Error:", error);
-//     }
-// };
-
-// Call initialization function
-//initializeFirebase();
-
-
-
-// const app = initializeFirebase();
-//const db = getFirestore(app);
-
 
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 // Function to retrieve the attendance code from Firestore
@@ -100,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Check if the 'refreshResult' button exists before adding an event listener
     const refreshResultButton = document.getElementById('refreshResult');
     if (refreshResultButton) {
         refreshResultButton.addEventListener('click', async () => {
@@ -390,6 +358,15 @@ async function displayAttendance() {
     const attendanceList = document.getElementById('attendanceList').getElementsByTagName('tbody')[0];
     attendanceList.innerHTML = ''; // Clear the current attendance list
 
+    function formatDate(date) {
+        const day = String(date.getDate()).padStart(2, '0');
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const month = monthNames[date.getMonth()];
+        const year = String(date.getFullYear()).slice(-2);
+        return `${day}-${month}-${year}`;
+    }
+
+
     try {
         const response = await fetch("/api/getAttendance");
 
@@ -405,40 +382,31 @@ async function displayAttendance() {
 
         const attendanceRecords = data.attendance;
         const today = new Date();
-        attendanceRecords.sort((a, b) => a.timestamp - b.timestamp);
+        attendanceRecords.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
         console.log(attendanceRecords);
-        
+
+        let formattedDate = formatDate(today);
+
         if (attendanceRecords.length > 0) {
             attendanceRecords.forEach((record) => {
                 const row = attendanceList.insertRow();
                 row.insertCell(0).textContent = record.name;
                 row.insertCell(1).textContent = record.code;
-                row.insertCell(2).textContent = new Date(record.date).toLocaleDateString();
+                row.insertCell(2).textContent = formattedDate;
             });
         } else {
             const row = attendanceList.insertRow();
             row.insertCell(0).textContent = "No Record For Today";
             row.insertCell(1).textContent = "No Code For Attendance";
-            row.insertCell(2).textContent = today.toLocaleDateString();
+            row.insertCell(2).textContent = formattedDate;
         }
     } catch (error) {
         console.error("Error fetching attendance:", error);
         const row = attendanceList.insertRow();
         row.insertCell(0).textContent = "Error Occured😵";
         row.insertCell(1).textContent = "Failed to load data, security increased 🔐";
-        row.insertCell(2).textContent = new Date().toLocaleDateString();
+        row.insertCell(2).textContent = formatDate(new Date());
     }
-}
-
-
-
-function getTodayCollectionId() {
-    let now = new Date();
-    let year = now.getFullYear();
-    let month = String(now.getMonth() + 1).padStart(2, '0'); // Add leading zero if month is single-digit
-    let day = String(now.getDate()).padStart(2, '0'); // Add leading zero if day is single-digit
-
-    return `${year}-${month}-${day}`; // Format: YYYY-MM-DD
 }
 
 
