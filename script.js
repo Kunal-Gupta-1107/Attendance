@@ -119,14 +119,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     
 
-    async function checkDuplicate(name, date) {
+    async function checkDuplicate(name) {
     try {
         const response = await fetch('/api/checkDuplicate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name, date })
+            body: JSON.stringify({ name })
         });
 
         const result = await response.json();
@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (isWithinLocation) {
                     const currentDate = new Date().toLocaleDateString();
-                    const isDuplicate = await checkDuplicate(name, currentDate);
+                    const isDuplicate = await checkDuplicate(name);
     
                     if (!isDuplicate && attendanceCode === currentCode) {
                         await addAttendance(name, attendanceCode);
