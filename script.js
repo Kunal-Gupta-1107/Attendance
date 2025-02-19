@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function addAttendance(name, attendanceCode) {
         try {
             const attendanceData = {
-                name: name,
+                name: name.trim(),
                 attendanceCode: attendanceCode,
                 timestamp: new Date().toISOString(), // Store timestamp as a string
                 date: new Date().toLocaleDateString() // Store date as a string
