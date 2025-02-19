@@ -1,4 +1,4 @@
-const CACHE_NAME = 'markmates-cache-v5';
+const CACHE_NAME = 'markmates-cache-v5.0';
 const urlsToCache = [
   '/',         
   '/index.html',
