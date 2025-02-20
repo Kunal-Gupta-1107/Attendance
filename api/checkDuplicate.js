@@ -18,12 +18,13 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: "Method Not Allowed" });
     }
 
-    const { name } = req.body;
+    const { name, code } = req.body;
 
     try {
         const attendanceQuery = query(
             collection(db, "attendance"),
-            where("name", "==", name)
+            where("name", "==", name),
+            where("attendanceCode", "==", code)
         );
         const querySnapshot = await getDocs(attendanceQuery);
 
