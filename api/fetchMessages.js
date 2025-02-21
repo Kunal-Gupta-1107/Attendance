@@ -37,10 +37,16 @@ export default async function handler(req, res) {
         let messagesArray = [];
         querySnapshot.forEach((doc) => {
             const messageData = doc.data();
+            const timestamp = messageData.time.toDate(); // fire base se time lega and convert to javascripta Object.
+            const formattedTime = timestamp.toLocaleTimeString('en-GB', {  //Change the time format to 24-hour  HH:MM                                               
+                hour: '2-digit',  
+                minute: '2-digit',
+                hour12: false,
+            }); 
             messagesArray.push({
                 message: messageData.message,
                 sender: messageData.sender,
-                time: messageData.time.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+                time: formattedTime,
             });
         });
 
