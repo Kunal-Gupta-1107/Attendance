@@ -40,7 +40,7 @@ export default async function handler(req, res) {
             messagesArray.push({
                 message: messageData.message,
                 sender: messageData.sender,
-                time: new Date(messageData.time.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+                time: messageData.time.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
             });
         });
 
