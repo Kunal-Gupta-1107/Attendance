@@ -48,9 +48,6 @@ You can install the PWA on your device for a native-like experience:
 ## Contribution
 Feel free to contribute by raising issues or suggesting improvements. Fork the repository and submit a pull request with your changes.
 
-## License
-This project is **open-source** and available under the **MIT License**.
-
 ---
 💡 *Developed by Kunal Gupta with a vision to make attendance marking seamless and secure.*
 
